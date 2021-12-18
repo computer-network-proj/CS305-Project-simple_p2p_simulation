@@ -181,7 +181,10 @@ class FileStorage:
         difference = partnerPieces.difference(myPieces)
 
         difference = list(difference)
-        return random.sample(difference,1)[0]
+        if len(difference) == 0:
+            return -1
+        else:
+            return random.sample(difference,1)[0]
 
 
 
@@ -209,14 +212,32 @@ if __name__ == '__main__':
     else:
         print("失败")
 
-    temp = FileStorage.fromFid("00001212")
+    temp = FileStorage.fromFid("00000048")
     print(file.isComplete())
     print(temp.isComplete())
 
-    list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    slice = random.sample(list,1)  # 从list中随机获取5个元素，作为一个片断返回
-    print(slice)
-    print(list)
+
+    #NOTE:test getFile
+    print(temp.getFile())
+    if file.getFile()==data_new:
+        print("pass")
+
+    #NOTE:test add
+    temp.add(10,b"asasdasdasd")
+    temp.add(11,b"asdasdas")
+    temp.add(12,b"asdasdasd")
+
+    #NOTE: test isInteresting and isInterested
+    print(file.isInterested(temp.haveFilePieces))
+    print(file.isInteresting(temp.haveFilePieces))
+    print(temp.isInterested(file.haveFilePieces))
+    print(temp.isInteresting(file.haveFilePieces))
+
+    #NOTE:test generateRequest
+    for i in range(500):
+        # print(file.generateRequest(temp.haveFilePieces))
+        if temp.generateRequest(file.haveFilePieces)==10:
+            print("fail")
     # a = '123absg'
     # b = time.time()
     # c = '%s|%s' % (a, b)
