@@ -1,5 +1,6 @@
 from PClient import PClient
 from DownloadTask import DownloadTask
+from FileStorage import FileStorage
 import threading
 
 class ProjectPClient(PClient):
@@ -27,7 +28,7 @@ class ProjectPClient(PClient):
             if task.fid == fid:
                 return task.get_file()
         # else:
-        new_task = DownloadTask(fid)
+        new_task = DownloadTask(FileStorage.fromFid(fid))
         self.tasks.append(new_task)
         return new_task.getFile()
 
