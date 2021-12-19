@@ -2,6 +2,7 @@ from abc import abstractmethod
 from enum import Enum
 
 
+
 class TrackerOperation(Enum):
     REGISTER = 1
     DOWNLOAD = 2
@@ -41,6 +42,7 @@ switchOperation = {
     b'0011': lambda :TrackerOperation.CANCEL,
     b'0100': lambda :TrackerOperation.CLOSE
 }
+
 class Packet:
 
     @staticmethod
@@ -56,6 +58,7 @@ class Packet:
 class ExamplePacket(Packet):
     def toBytes(self, data):
         origin = b'example'
+
         origin = (0).to_bytes(length=1, byteorder="big")  + origin
         return origin
 
@@ -94,3 +97,4 @@ class TrackerReqPacket(Packet):
                 self.op.to_bytes(length=1, byteorder="big") + \
                 self.fid.encode()
         return bts
+

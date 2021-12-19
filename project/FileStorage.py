@@ -7,9 +7,10 @@ import os
 import random
 import time
 
-BLOCK_SIZE = 131072  # 16KB
+BLOCK_SIZE = 131072  # 128KB, 16KB
 
 
+# 输入数字，生成 8 位字符串
 def generateFidHead(str):
     return "%08d" % str
 
@@ -19,6 +20,7 @@ def MD5(data):
     md5obj.update(data)
     dataHash = md5obj.hexdigest()
     return dataHash
+
 
 class FileStorage:
     def __init__(self, filePieces=[], haveFilePieces=[], promises=[], fid=None):
@@ -62,12 +64,9 @@ class FileStorage:
             have_file_pieces.append(True)
             promises.append(False)
 
-
         data_hash = FileStorage.generateFid(data)
-
         fid = generateFidHead(block_num) + data_hash
-
-        fileStorage = FileStorage(filePieces=file_pieces,haveFilePieces=have_file_pieces,fid=fid,promises=promises)
+        fileStorage = FileStorage(filePieces=file_pieces, haveFilePieces=have_file_pieces, fid=fid, promises=promises)
 
         return fileStorage
 
@@ -83,11 +82,11 @@ class FileStorage:
         haveFilePieces = []
         promises = []
         for i in range(block_num):
-            filePieces.append(b"") #None
+            filePieces.append(b"")  # None
             haveFilePieces.append(False)
             promises.append(False)
 
-        fileStorage = FileStorage(filePieces=filePieces,haveFilePieces=haveFilePieces,promises=promises,fid=fid)
+        fileStorage = FileStorage(filePieces=filePieces, haveFilePieces=haveFilePieces, promises=promises, fid=fid)
         return fileStorage
 
     def isComplete(self):
@@ -97,12 +96,9 @@ class FileStorage:
         """
         checkFile = b""
         for item in self.filePieces:
-            checkFile = checkFile+item
+            checkFile = checkFile + item
         fileHash = MD5(checkFile)
-        if fileHash == self.fid[8:]:
-            return True
-        else:
-            return False
+        return fileHash == self.fid[8:]
 
     def getFile(self):
         """
@@ -152,12 +148,9 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: boolean值
         """
-        myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] == True])
-        partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] == True])
-        if partnerPieces > myPieces:
-            return True
-        else:
-            return False
+        myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] is True])
+        partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] is True])
+        return partnerPieces > myPieces
 
     def isInterested(self, haveFilePiecesOffered):
         """
@@ -167,10 +160,7 @@ class FileStorage:
         """
         myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] == True])
         partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] == True])
-        if myPieces > partnerPieces:
-            return True
-        else:
-            return False
+        return myPieces > partnerPieces
 
     def generateRequest(self, haveFilePiecesOffered):
         """
@@ -186,9 +176,7 @@ class FileStorage:
         if len(difference) == 0:
             return -1
         else:
-            return random.sample(difference,1)[0]
-
-
+            return random.sample(difference, 1)[0]
 
 
 if __name__ == '__main__':
@@ -209,7 +197,7 @@ if __name__ == '__main__':
     fid_new = FileStorage.generateFid(data_new)
     print(file.fid)
     print(fid_new)
-    if data_new == b and fid_new ==file.fid[8:]:
+    if data_new == b and fid_new == file.fid[8:]:
         print("成功")
     else:
         print("失败")
@@ -218,27 +206,26 @@ if __name__ == '__main__':
     print(file.isComplete())
     print(temp.isComplete())
 
-
-    #NOTE:test getFile
+    # NOTE:test getFile
     print(temp.getFile())
-    if file.getFile()==data_new:
+    if file.getFile() == data_new:
         print("pass")
 
-    #NOTE:test add
-    temp.add(10,b"asasdasdasd")
-    temp.add(11,b"asdasdas")
-    temp.add(12,b"asdasdasd")
+    # NOTE:test add
+    temp.add(10, b"asasdasdasd")
+    temp.add(11, b"asdasdas")
+    temp.add(12, b"asdasdasd")
 
-    #NOTE: test isInteresting and isInterested
+    # NOTE: test isInteresting and isInterested
     print(file.isInterested(temp.haveFilePieces))
     print(file.isInteresting(temp.haveFilePieces))
     print(temp.isInterested(file.haveFilePieces))
     print(temp.isInteresting(file.haveFilePieces))
 
-    #NOTE:test generateRequest
+    # NOTE:test generateRequest
     for i in range(500):
         # print(file.generateRequest(temp.haveFilePieces))
-        if temp.generateRequest(file.haveFilePieces)==10:
+        if temp.generateRequest(file.haveFilePieces) == 10:
             print("fail")
     # a = '123absg'
     # b = time.time()

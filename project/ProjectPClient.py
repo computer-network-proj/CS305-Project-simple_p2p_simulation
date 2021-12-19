@@ -6,6 +6,7 @@ from DownloadTask import DownloadTask
 from FileStorage import FileStorage
 import threading
 
+
 from Proxy import Proxy
 
 
@@ -15,8 +16,10 @@ class ProjectPClient(PClient):
         super().__init__(tracker_addr, proxy, port, upload_rate, download_rate)
         self.active =True
         self.tasks = []
+
         threading.Thread(target=self.recvThread).start()
         #TODO our init code
+
 
     def recvThread(self):
         while self.active:
@@ -31,7 +34,6 @@ class ProjectPClient(PClient):
 
         # TODO our code
 
-
     def download(self, fid) -> bytes:
         # TODO 这里需要上线程锁
         # if task already exists:
@@ -43,7 +45,6 @@ class ProjectPClient(PClient):
         self.tasks.append(new_task)
         return new_task.getFile()
 
-
     def cancel(self, fid):
         packet = TrackerPacket.generatePacket(TrackerOperation.CANCEL,fid.encode())
         self.__send__(packet,self.tracker)
@@ -52,6 +53,7 @@ class ProjectPClient(PClient):
     def close(self):
         pass
         # TODO our code
+
 
 
 if __name__ == '__main__':
@@ -65,5 +67,5 @@ if __name__ == '__main__':
     PC1.cancel('000000481783c1907f8a1b5225abdbc0b395ad93')
     PC1.cancel('000000481783c1907f8a1b5225abdbc0b395ad93')
 
-    site = {'name': '我的博客地址', 'alexa': 10000, 'url': 'http://blog.csdn.net/uuihoo/'}
-    pop_obj = site.pop('name')
+
+
