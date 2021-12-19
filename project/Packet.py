@@ -11,16 +11,13 @@ class Packet:
     def getType(data):
         return int.from_bytes(data[0:1], byteorder="big")
 
+    @staticmethod
+    def getFid(data):
+        return data[1:37].decode()
+
     @abstractmethod
     def toBytes(self):
         raise NotImplementedError()
-
-
-class ExamplePacket(Packet):
-    def toBytes(self):
-        origin = b'example'
-        origin = (0).to_bytes(length=1, byteorder="big") + origin
-        return origin
 
 
 class TrackerReqPacket(Packet):
@@ -51,15 +48,16 @@ class TrackerReqPacket(Packet):
 
     @staticmethod
     def fromBytes(data):
-        op = int.from_bytes(data[1:2], byteorder="big")
-        fid = data[2:].decode()
+        fid = Packet.getFid(data)
+        op = int.from_bytes(data[37:38], byteorder="big")
+
         return TrackerReqPacket(op, fid)
 
     def toBytes(self):
         type = 1
         bts = type.to_bytes(length=1, byteorder="big") + \
-              self.op.to_bytes(length=1, byteorder="big") + \
-              self.fid.encode()
+              self.fid.encode() + \
+              self.op.to_bytes(length=1, byteorder="big")
         return bts
 
     def __str__(self):
@@ -67,17 +65,20 @@ class TrackerReqPacket(Packet):
 
 
 class TrackerRespPacket(Packet):
-    def __init__(self, info={}):
+    def __init__(self, fid, info={}):
+        self.fid = fid
         self.info = info
 
     @staticmethod
     def fromBytes(data):
-        info = eval(data[1:].decode())
-        return TrackerRespPacket(info)
+        fid = Packet.getFid(data)
+        info = eval(data[37:].decode())
+        return TrackerRespPacket(fid, info)
 
     def toBytes(self):
         type = 2
         bts = type.to_bytes(length=1, byteorder="big") + \
+              self.fid.encode() + \
               str(self.info).encode()
         return bts
 
@@ -92,7 +93,7 @@ class ClientReqPacket(Packet):
 
     @staticmethod
     def fromBytes(data):
-        fid = data[1:37].decode()
+        fid = Packet.getFid(data)
         index = int.from_bytes(data[37:], byteorder="big")
         return ClientReqPacket(fid, index)
 
@@ -105,12 +106,12 @@ class ClientReqPacket(Packet):
 
 
 class ClientRespPacket(Packet):
-    def __init__(self, haveFilePieces, index, data):
+    def __init__(self, fid, haveFilePieces, index, data):
+        self.fid = fid
         self.haveFilePieces = haveFilePieces
         self.headLength = len(haveFilePieces)
         self.index = index
         self.data = data
-        pass
 
     @staticmethod
     def BoolList2Bytes(boolList: list[bool], length: int):
@@ -133,15 +134,17 @@ class ClientRespPacket(Packet):
 
     @staticmethod
     def fromBytes(data):
-        headLength = int.from_bytes(data[1:5], byteorder="big")
-        index = int.from_bytes(data[5:9], byteorder="big")
-        haveFilePieces = ClientRespPacket.Bytes2BoolList(data[9:9 + headLength // 8 + 1])
-        ddata = data[9 + headLength // 8 + 1:]
-        return ClientRespPacket(haveFilePieces, index, ddata)
+        fid = Packet.getFid(data)
+        headLength = int.from_bytes(data[37:41], byteorder="big")
+        index = int.from_bytes(data[41:45], byteorder="big")
+        haveFilePieces = ClientRespPacket.Bytes2BoolList(data[45:45 + headLength // 8 + 1])
+        ddata = data[45 + headLength // 8 + 1:]
+        return ClientRespPacket(fid, haveFilePieces, index, ddata)
 
     def toBytes(self):
         type = 4
         bts = type.to_bytes(length=1, byteorder="big") + \
+              self.fid.encode() + \
               self.headLength.to_bytes(length=4, byteorder="big") + \
               self.index.to_bytes(length=4, byteorder="big") + \
               ClientRespPacket.BoolList2Bytes(self.haveFilePieces, self.headLength) + \

@@ -14,8 +14,10 @@ class ProjectPClient(PClient):
     def __init__(self, tracker_addr: (str, int), proxy=None, port=None, upload_rate=0, download_rate=0):
         super().__init__(tracker_addr, proxy, port, upload_rate, download_rate)
         self.active = True
+
         self.tasks = {}
         # self.fidMap = {}
+
         threading.Thread(target=self.recvThread).start()
         # TODO our init code
 
@@ -24,6 +26,8 @@ class ProjectPClient(PClient):
             packet, cid = self.__recv__()
             packetType = Packet.getType(packet)
             if packetType == 2:
+                TrackerRespPacket(packet)
+            if packetType == 3:
                 pass
             if packetType == 4:
                 pass
@@ -35,6 +39,7 @@ class ProjectPClient(PClient):
         packet = TrackerReqPacket.newRegister(fileStorage.fid)
         packet = packet.toBytes()
         self.__send__(packet, self.tracker)
+
         fid = fileStorage.fid
         if fid in self.tasks:
             self.tasks[fid].fileStorage = fileStorage
