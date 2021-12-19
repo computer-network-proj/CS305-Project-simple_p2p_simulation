@@ -7,7 +7,8 @@ import os
 import random
 import time
 
-BLOCK_SIZE = 131072  # 128KB, 16KB
+BLOCK_SIZE = 128 * 1024  # 现为128KB，可能设置16KB
+
 
 
 # 输入数字，生成 8 位字符串
@@ -15,7 +16,13 @@ def generateFidHead(str):
     return  int(str).to_bytes(length=4, byteorder="big")
 
 
-def MD5(data):
+
+def MD5(data: bytes):
+    """
+    输入byte串，返回其hash
+    :param data: 类型为byte
+    :return:
+    """
     md5obj = hashlib.md5()
     md5obj.update(data)
     dataHash = md5obj.hexdigest()
@@ -24,6 +31,12 @@ def MD5(data):
 
 class FileStorage:
     def __init__(self, filePieces=[], haveFilePieces=[], promises=[], fid=None):
+        """
+        :param filePieces:
+        :param haveFilePieces:
+        :param promises:
+        :param fid: str, 前8位为chunk数量，后为文件数据hash，作为文件id
+        """
         self.filePieces = filePieces
         self.haveFilePieces = haveFilePieces
         self.promises = promises
@@ -31,7 +44,7 @@ class FileStorage:
         self.promisesMap = {}
 
     @staticmethod
-    def generateFid(data):
+    def generateFid(data: bytes):
         """
         以文件byte生成一个种子
         :param data: 文件bytes
@@ -162,9 +175,11 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: boolean值
         """
+
         blockNum = int.from_bytes(self.fid.encode()[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
+
         return len(myPieces - partnerPieces) > 0
 
     def generateRequest(self, haveFilePiecesOffered):
@@ -173,11 +188,12 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: 文件片段index。如果找不到，返回-1
         """
+
         blockNum = int.from_bytes(self.fid.encode()[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
-        difference = partnerPieces.difference(myPieces)
 
+        difference = partnerPieces.difference(myPieces)
         difference = list(difference)
         if len(difference) == 0:
             return -1
