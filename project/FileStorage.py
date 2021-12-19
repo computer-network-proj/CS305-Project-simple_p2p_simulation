@@ -7,15 +7,24 @@ import os
 import random
 import time
 
-BLOCK_SIZE = 131072  # 128KB, 16KB
+BLOCK_SIZE = 128 * 1024  # 现为128KB，可能设置16KB
 
 
-# 输入数字，生成 8 位字符串
-def generateFidHead(str):
-    return "%08d" % str
+def generateFidHead(block_num):
+    """
+    输入文件分片数量，生成 8 位字符串
+    :param block_num:
+    :return:
+    """
+    return "%08d" % block_num
 
 
-def MD5(data):
+def MD5(data: bytes):
+    """
+    输入byte串，返回其hash
+    :param data: 类型为byte
+    :return:
+    """
     md5obj = hashlib.md5()
     md5obj.update(data)
     dataHash = md5obj.hexdigest()
@@ -24,6 +33,12 @@ def MD5(data):
 
 class FileStorage:
     def __init__(self, filePieces=[], haveFilePieces=[], promises=[], fid=None):
+        """
+        :param filePieces:
+        :param haveFilePieces:
+        :param promises:
+        :param fid: str, 前8位为chunk数量，后为文件数据hash，作为文件id
+        """
         self.filePieces = filePieces
         self.haveFilePieces = haveFilePieces
         self.promises = promises
@@ -31,7 +46,7 @@ class FileStorage:
         self.promisesMap = {}
 
     @staticmethod
-    def generateFid(data):
+    def generateFid(data: bytes):
         """
         以文件byte生成一个种子
         :param data: 文件bytes
@@ -158,8 +173,8 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: boolean值
         """
-        myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] == True])
-        partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] == True])
+        myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] is True])
+        partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] is True])
         return len(myPieces - partnerPieces) > 0
 
     def generateRequest(self, haveFilePiecesOffered):
@@ -168,10 +183,9 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: 文件片段index。如果找不到，返回-1
         """
-        myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] == True])
-        partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] == True])
+        myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] is True])
+        partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] is True])
         difference = partnerPieces.difference(myPieces)
-
         difference = list(difference)
         if len(difference) == 0:
             return -1

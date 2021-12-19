@@ -18,6 +18,7 @@ class ProjectPClient(PClient):
         self.tasks = []
         self.fidMap = {}
         threading.Thread(target=self.recvThread).start()
+        threading.Thread(target=self.sendThread).start()
         #TODO our init code
 
 
@@ -26,6 +27,9 @@ class ProjectPClient(PClient):
             packet, identification = self.__recv__()
             print(packet)
             print(Packet.getType(packet))
+
+    def sendThread(self):
+        pass
 
     def register(self, file_path: str):
         fileStorage = FileStorage.fromPath(file_path)

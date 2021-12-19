@@ -10,10 +10,6 @@ class Pipe:
         self.send_queue = SimpleQueue()
         self.recv_queue = SimpleQueue()
 
-    def send(self, data, address):
-        pass
-        # TODO
-
     def recv(self, timeout=None) -> (bytes, (str, int)):
         pass
         # TODO
