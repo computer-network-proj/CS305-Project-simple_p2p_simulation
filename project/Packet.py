@@ -44,7 +44,7 @@ class TrackerReqPacket(Packet):
 
     @staticmethod
     def newClose():
-        return TrackerReqPacket(4, "")
+        return TrackerReqPacket(4, "0"*36)
 
     @staticmethod
     def fromBytes(data):

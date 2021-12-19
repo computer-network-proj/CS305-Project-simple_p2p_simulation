@@ -25,13 +25,13 @@ class ProjectPClient(PClient):
         while self.active:
             packet, cid = self.__recv__()
             packetType = Packet.getType(packet)
-            if packetType == 2:
-                TrackerRespPacket(packet)
-            if packetType == 3:
-                pass
-            if packetType == 4:
-                pass
             print(str(self.proxy.port) + " " + TrackerRespPacket.fromBytes(packet).__str__() + "\n", end="")
+
+            fid = Packet.getFid(packet)
+            if fid  in self.tasks.keys():
+                self.tasks[fid].pipe.recv_queue.put((packet,cid))
+
+
 
     def register(self, file_path: str):
         fileStorage = FileStorage.fromPath(file_path)
@@ -61,6 +61,7 @@ class ProjectPClient(PClient):
 
     def cancel(self, fid):
         # packet = TrackerPacket.generatePacket(TrackerOperation.CANCEL,fid.encode())
+        print(fid)
         packet = TrackerReqPacket.newCancel(fid)
         packet = packet.toBytes()
         self.__send__(packet, self.tracker)
@@ -83,13 +84,14 @@ if __name__ == '__main__':
     PC1.register(file_path)
     PC2.register(file_path)
     PC3.register(file_path)
-
+    fid = FileStorage.fromPath(file_path).fid
+    print(fid)
     time.sleep(1)
     PC1.close()
 
-    PC1.cancel('000000481783c1907f8a1b5225abdbc0b395ad93')
-    PC1.cancel('000000481783c1907f8a1b5225abdbc0b395ad93')
-    PC2.cancel('000000481783c1907f8a1b5225abdbc0b395ad93')
+    PC1.cancel(fid)
+    PC1.cancel(fid)
+    PC2.cancel(fid)
     PC1.close()
     PC2.close()
     PC3.close()
