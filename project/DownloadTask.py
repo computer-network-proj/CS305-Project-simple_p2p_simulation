@@ -15,6 +15,7 @@ class DownloadTask:
     def __init__(self, fileStorage: FileStorage, send_func):
         self.fid = fileStorage.fid
         self.peers = set()
+        self.closed = False
         self.downloadingPeers = set()
         self.pipe = Pipe(send_func)
         self.titfortat = TitForTat()
@@ -27,7 +28,7 @@ class DownloadTask:
         实现recv的核心线程
         :return:
         """
-        while True:
+        while not self.closed:
             packet = self.pipe.recv()
             self.titfortat.monitoring(packet)
             data, cid = packet
@@ -61,7 +62,7 @@ class DownloadTask:
                         self.pipe.send(ClientReqPacket(self.fileStorage.fid, self.fileStorage.generateRequest(p.haveFilePieces)).toBytes(), cid)
 
     def _autoAsk(self):
-        while True:
+        while not self.closed:
             if self.fileStorage.isComplete():
                 return
             time.sleep(0.1)
@@ -77,7 +78,7 @@ class DownloadTask:
         获取文件
         :return:
         """
-        while True:
+        while not self.closed:
             time.sleep(0.01)
             if self.fileStorage.isComplete():
                 return self.fileStorage.getFile()
