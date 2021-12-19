@@ -126,6 +126,7 @@ class FileStorage:
         self.filePieces[index] = data
         self.haveFilePieces[index] = True
         self.promises[index] = True
+
     def cancel(self, cid):
         """
         取消一个client对象的承诺。
@@ -141,6 +142,7 @@ class FileStorage:
         :param index: 文件片段index
         :param cid: client对象的id
         """
+
         self.promisesMap[cid] = index
         self.promises[index] = True
 
