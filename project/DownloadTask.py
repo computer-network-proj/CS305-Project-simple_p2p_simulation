@@ -3,6 +3,7 @@ from TitForTat import TitForTat
 import threading
 from FileStorage import FileStorage
 import time
+import random
 
 '''
 职能：client对特定文件的维护类
@@ -10,12 +11,15 @@ import time
 
 
 class DownloadTask:
-    def __init__(self, fileStorage: FileStorage):
+    def __init__(self, fileStorage: FileStorage, send_func):
         self.fid = fileStorage.fid
-        self.pipe = Pipe()
+        self.peers = set()
+        self.downloadingPeers = set()
+        self.pipe = Pipe(send_func)
         self.titfortat = TitForTat()
         self.fileStorage = fileStorage
         threading.Thread(target=self.run).start()
+        threading.Thread(target=self._autoAsk).start()
 
     def run(self):
         """
@@ -26,6 +30,19 @@ class DownloadTask:
             packet = self.pipe.recv()
             self.titfortat.monitoring(packet)
             # TODO
+
+    def _autoAsk(self):
+        while True:
+            if self.fileStorage.isComplete():
+                return
+            time.sleep(0.1)
+            possiblePeers = list(self.peers - self.downloadingPeers)
+            if possiblePeers:
+                randomPeerCid = random.choice(possiblePeers)
+                # self.pipe.send()
+                # TODO
+                self.downloadingPeers.add(randomPeerCid)
+
 
     def getFile(self):
         """
