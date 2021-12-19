@@ -13,7 +13,6 @@ class ProjectTracker(Tracker):
         # TODO our code
 
     def start(self):
-
         while True:
             packet, identification = self.__recv__()
             print("Receive packet:{} from {}".format(packet, identification))
