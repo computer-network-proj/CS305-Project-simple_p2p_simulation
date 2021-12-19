@@ -1,5 +1,5 @@
 from Tracker import Tracker
-from Packet import TrackerReqPacket
+from Packet import TrackerReqPacket,TrackerRespPacket
 
 
 class ProjectTracker(Tracker):
@@ -77,17 +77,21 @@ class ProjectTracker(Tracker):
     def broadcast(self, fid: str):
         receivers = self.information.get(fid)
         receivers = list(receivers)
+
         tempDictionary = {}
         tempDictionary[fid] = receivers
-        sendData = str(tempDictionary)
+
+        packet = TrackerRespPacket(tempDictionary)
+        packet = packet.toBytes()
+
         for item in receivers:
-            self.response(sendData, item)
+            self.__send__(packet,item)
 
     def default(self, fid, clientIdentification):
         raise NotImplementedError()
 
-    def response(self, data: str, address: (str, int)):
-        self.__send__(data.encode(), address)
+    # def response(self, data: str, address: (str, int)):
+    #     self.__send__(data.encode(), address)
 
 
 if __name__ == '__main__':
