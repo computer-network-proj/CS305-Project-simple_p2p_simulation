@@ -1,17 +1,14 @@
 from Tracker import Tracker
-from Packet import TrackerPacket, TrackerOperation
-
-
-
+from Packet import TrackerReqPacket
 
 
 class ProjectTracker(Tracker):
     def __init__(self, upload_rate=10000, download_rate=10000, port=None):
         super().__init__(upload_rate, download_rate, port)
-        self.SWITCH = {TrackerOperation.REGISTER: self.register,
-                  TrackerOperation.DOWNLOAD: self.download,
-                  TrackerOperation.CANCEL: self.cancel,
-                  TrackerOperation.CLOSE: self.close}
+        self.SWITCH = {1: self.register,
+                       2: self.download,
+                       3: self.cancel,
+                       4: self.close}
         self.information = {}
         # TODO our code
 
@@ -20,16 +17,16 @@ class ProjectTracker(Tracker):
         while True:
             packet, identification = self.__recv__()
             print("Receive packet:{} from {}".format(packet, identification))
-            header, type, info = TrackerPacket.generateInformation(packet)
 
-            print(header)
-            print(type)
-            print(info)
-            self.SWITCH.get(type,self.default)(info,identification)
+            # header, type, info = TrackerPacket.generateInformation(packet)
+            packet = TrackerReqPacket.fromBytes(packet)
+            type = packet.op
+            info = packet.fid
+            print(packet)
+            self.SWITCH.get(type, self.default)(info, identification)
         # TODO our code
 
     def register(self, fid, clientIdentification):
-        fid = fid.decode()
         if fid not in self.information.keys():
             self.information[fid] = set()
             self.information[fid].add(clientIdentification)
@@ -39,7 +36,6 @@ class ProjectTracker(Tracker):
         self.broadcast(fid)
 
     def download(self, fid, clientIdentification):
-        fid = fid.decode()
         if fid not in self.information.keys():
             self.information[fid] = set()
             self.information[fid].add(clientIdentification)
@@ -49,7 +45,6 @@ class ProjectTracker(Tracker):
         self.broadcast(fid)
 
     def cancel(self, fid, clientIdentification):
-        fid = fid.decode()
         if fid in self.information.keys():
             if clientIdentification in self.information[fid]:
                 self.information[fid].remove(clientIdentification)
@@ -62,29 +57,41 @@ class ProjectTracker(Tracker):
         else:
             pass
 
-    def close(self, fid,clientIdentification):
+    def close(self, fid, clientIdentification):
+        broadcastList = []
+        zeroList = []
         for item in self.information.keys():
-            self.cancel(item,clientIdentification)
+            if clientIdentification in self.information[item]:
+                self.information[item].remove(clientIdentification)
+                if len(self.information[item]) == 0:
+                    zeroList.append(item)
+                else:
+                    broadcastList.append(item)
 
-    def broadcast(self,fid:str):
+        for fid in zeroList:
+            self.information.pop(fid)
+
+        for fid in broadcastList:
+            self.broadcast(fid)
+
+    def broadcast(self, fid: str):
         receivers = self.information.get(fid)
         receivers = list(receivers)
         tempDictionary = {}
         tempDictionary[fid] = receivers
         sendData = str(tempDictionary)
         for item in receivers:
-            self.response(sendData,item)
+            self.response(sendData, item)
 
-    def default(self,fid,clientIdentification):
+    def default(self, fid, clientIdentification):
         raise NotImplementedError()
 
     def response(self, data: str, address: (str, int)):
         self.__send__(data.encode(), address)
 
+
 if __name__ == '__main__':
     tracker = ProjectTracker(port=10086)
     tracker.start()
 
-        pass
-        # TODO our code
-
+    # TODO our code

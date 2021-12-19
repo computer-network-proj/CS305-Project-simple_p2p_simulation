@@ -150,7 +150,7 @@ class FileStorage:
         """
         myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] is True])
         partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] is True])
-        return partnerPieces > myPieces
+        return len(partnerPieces - myPieces) > 0
 
     def isInterested(self, haveFilePiecesOffered):
         """
@@ -160,7 +160,7 @@ class FileStorage:
         """
         myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] == True])
         partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] == True])
-        return myPieces > partnerPieces
+        return len(myPieces - partnerPieces) > 0
 
     def generateRequest(self, haveFilePiecesOffered):
         """

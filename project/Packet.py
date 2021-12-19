@@ -1,47 +1,5 @@
 from abc import abstractmethod
-from enum import Enum
 
-
-
-class TrackerOperation(Enum):
-    REGISTER = 1
-    DOWNLOAD = 2
-    CANCEL = 3
-    CLOSE = 4
-
-
-def case1():
-    return b'0001'
-
-
-def case2():
-    return b'0010'
-
-
-def case3():
-    return b'0011'
-
-
-def case4():
-    return b'0100'
-
-
-def default():
-    raise NotImplementedError()
-
-
-switch = {TrackerOperation.REGISTER: case1,
-          TrackerOperation.DOWNLOAD: case2,
-          TrackerOperation.CANCEL: case3,
-          TrackerOperation.CLOSE: case4}
-
-
-switchOperation = {
-    b'0001': lambda :TrackerOperation.REGISTER,
-    b'0010': lambda :TrackerOperation.DOWNLOAD,
-    b'0011': lambda :TrackerOperation.CANCEL,
-    b'0100': lambda :TrackerOperation.CLOSE
-}
 
 class Packet:
 
@@ -49,6 +7,10 @@ class Packet:
     def fromBytes(self, data):
         # TODO
         raise NotImplementedError()
+
+    @staticmethod
+    def getType(data):
+        return int.from_bytes(data[0:1], byteorder="big")
 
     @abstractmethod
     def toBytes(self, data):
@@ -63,20 +25,6 @@ class ExamplePacket(Packet):
         return origin
 
 
-class TrackerPacket(Packet):
-    @staticmethod
-    def generatePacket(type,data):
-        header = b'0'
-        typeByte = switch.get(type, default)()
-        return header + typeByte + data
-
-    @staticmethod
-    def generateInformation(data):
-        header = data[0:1]
-        type = switchOperation.get(data[1:5],default)()
-        info = data[5:]
-        return header,type,info
-
 class TrackerReqPacket(Packet):
     def __init__(self, op, fid):
         """
@@ -87,9 +35,27 @@ class TrackerReqPacket(Packet):
         self.op = op
         self.fid = fid
 
-    @classmethod
-    def fromBytes(cls, data):
-        op = int(data[9:16])
+    @staticmethod
+    def newRegister(fid):
+        return TrackerReqPacket(1,fid)
+
+    @staticmethod
+    def newDownload(fid):
+        return TrackerReqPacket(2,fid)
+
+    @staticmethod
+    def newCancel(fid):
+        return TrackerReqPacket(3,fid)
+
+    @staticmethod
+    def newClose():
+        return TrackerReqPacket(4,"")
+
+    @staticmethod
+    def fromBytes(data):
+        op = int.from_bytes(data[1:2], byteorder="big")
+        fid = data[2:].decode()
+        return TrackerReqPacket(op,fid)
 
     def toBytes(self):
         type = 1
@@ -98,3 +64,11 @@ class TrackerReqPacket(Packet):
                 self.fid.encode()
         return bts
 
+    def __str__(self):
+        return "Type:{},op:{},fid:{}".format(1,self.op,self.fid)
+
+if __name__ == '__main__':
+    trp = TrackerReqPacket(1,"31233333")
+    temp = trp.toBytes()
+    print(trp.toBytes())
+    recover = TrackerReqPacket.fromBytes(temp)
