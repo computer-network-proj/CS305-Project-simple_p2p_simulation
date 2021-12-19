@@ -1,6 +1,6 @@
 from Pipe import Pipe
 from TitForTat import TitForTat
-from Packet import ClientReqPacket, Packet, ClientRespPacket
+from Packet import ClientReqPacket, Packet, ClientRespPacket, TrackerRespPacket
 import threading
 from FileStorage import FileStorage
 import time
@@ -32,8 +32,12 @@ class DownloadTask:
             self.titfortat.monitoring(packet)
             data, cid = packet
             type = Packet.getType(data)
+            # tracker
+            if type == 2:
+                p = TrackerRespPacket.fromBytes(data)
+                self.peers = p.info
             # get request
-            if type == 3:
+            elif type == 3:
                 p = ClientReqPacket.fromBytes(data)
                 if p.index == -1:
                     self.pipe.send(ClientRespPacket(self.fileStorage.haveFilePieces, -1, b'').toBytes(), cid)
@@ -49,6 +53,7 @@ class DownloadTask:
                 p = ClientRespPacket.fromBytes(data)
                 if p.index == -2:
                     self.fileStorage.cancel(cid)
+                    self.downloadingPeers.remove(cid)
                 else:
                     if p.index != -1:
                         self.fileStorage.add(p.index, p.data)
