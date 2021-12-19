@@ -53,7 +53,6 @@ class FileStorage:
         size = os.path.getsize(path)
         data = bin_file.read()
         bin_file.close()
-
         block_num = size // BLOCK_SIZE if size % BLOCK_SIZE == 0 else size // BLOCK_SIZE + 1
         head = 0
         file_pieces = []

@@ -82,6 +82,6 @@ if __name__ == '__main__':
     PC1.close()
     PC2.close()
     PC3.close()
-    print(len(b'000000481783c1907f8a1b5225abdbc0b395ad93'))
+    # print(len(b'000000481783c1907f8a1b5225abdbc0b395ad93'))
 
 
