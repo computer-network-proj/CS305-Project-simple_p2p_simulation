@@ -1,5 +1,5 @@
 from Tracker import Tracker
-from Packet import TrackerReqPacket,TrackerRespPacket
+from Packet import TrackerReqPacket, TrackerRespPacket
 
 
 class ProjectTracker(Tracker):
@@ -85,7 +85,7 @@ class ProjectTracker(Tracker):
         packet = packet.toBytes()
 
         for item in receivers:
-            self.__send__(packet,item)
+            self.__send__(packet, item)
 
     def default(self, fid, clientIdentification):
         raise NotImplementedError()

@@ -23,7 +23,7 @@ class TitForTat:
         :param packet:
         """
         data, cid = packet
-        if Packet.Packet.getType(data) == 4:    # TODO: 设置具体需要监测包的类型
+        if Packet.Packet.getType(data) == 4:  # TODO: 设置具体需要监测包的类型
             self.operating.append(cid)
 
     def _monitoring_thread(self):

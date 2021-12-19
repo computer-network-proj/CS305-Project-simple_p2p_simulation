@@ -1,11 +1,10 @@
 import time
 
-from Packet import TrackerReqPacket,Packet,TrackerRespPacket
+from Packet import TrackerReqPacket, Packet, TrackerRespPacket
 from PClient import PClient
 from DownloadTask import DownloadTask
 from FileStorage import FileStorage
 import threading
-
 
 from Proxy import Proxy
 
@@ -14,19 +13,18 @@ class ProjectPClient(PClient):
 
     def __init__(self, tracker_addr: (str, int), proxy=None, port=None, upload_rate=0, download_rate=0):
         super().__init__(tracker_addr, proxy, port, upload_rate, download_rate)
-        self.active =True
+        self.active = True
         self.tasks = []
         self.fidMap = {}
         threading.Thread(target=self.recvThread).start()
         threading.Thread(target=self.sendThread).start()
-        #TODO our init code
-
+        # TODO our init code
 
     def recvThread(self):
         while self.active:
             packet, identification = self.__recv__()
 
-            print(str(self.proxy.port)+ " " + TrackerRespPacket.fromBytes(packet).__str__()+"\n",end="")
+            print(str(self.proxy.port) + " " + TrackerRespPacket.fromBytes(packet).__str__() + "\n", end="")
 
     def sendThread(self):
         pass
@@ -36,7 +34,7 @@ class ProjectPClient(PClient):
         # packet = TrackerPacket.generatePacket(TrackerOperation.REGISTER,byteFid)
         packet = TrackerReqPacket.newRegister(fileStorage.fid)
         packet = packet.toBytes()
-        self.__send__(packet,self.tracker)
+        self.__send__(packet, self.tracker)
 
         # TODO our code
 
@@ -55,15 +53,14 @@ class ProjectPClient(PClient):
         # packet = TrackerPacket.generatePacket(TrackerOperation.CANCEL,fid.encode())
         packet = TrackerReqPacket.newCancel(fid)
         packet = packet.toBytes()
-        self.__send__(packet,self.tracker)
+        self.__send__(packet, self.tracker)
         # TODO our code
 
     def close(self):
         packet = TrackerReqPacket.newClose()
         packet = packet.toBytes()
-        self.__send__(packet,self.tracker)
+        self.__send__(packet, self.tracker)
         # TODO our code
-
 
 
 if __name__ == '__main__':
@@ -86,6 +83,3 @@ if __name__ == '__main__':
     PC1.close()
     PC2.close()
     PC3.close()
-    print(len(b'000000481783c1907f8a1b5225abdbc0b395ad93'))
-
-
