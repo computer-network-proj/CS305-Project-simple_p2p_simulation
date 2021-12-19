@@ -1,6 +1,6 @@
 import time
 
-from Packet import TrackerReqPacket,Packet
+from Packet import TrackerReqPacket,Packet,TrackerRespPacket
 from PClient import PClient
 from DownloadTask import DownloadTask
 from FileStorage import FileStorage
@@ -25,8 +25,8 @@ class ProjectPClient(PClient):
     def recvThread(self):
         while self.active:
             packet, identification = self.__recv__()
-            print(packet)
-            print(Packet.getType(packet))
+
+            print(str(self.proxy.port)+ " " + TrackerRespPacket.fromBytes(packet).__str__()+"\n",end="")
 
     def sendThread(self):
         pass
@@ -76,6 +76,8 @@ if __name__ == '__main__':
     PC1.register(file_path)
     PC2.register(file_path)
     PC3.register(file_path)
+
+    time.sleep(1)
     PC1.close()
 
     PC1.cancel('000000481783c1907f8a1b5225abdbc0b395ad93')

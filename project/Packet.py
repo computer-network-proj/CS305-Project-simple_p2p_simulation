@@ -79,8 +79,37 @@ class TrackerRespPacket(Packet):
 
 
 
+
+class TrackerRespPacket(Packet):
+    def __init__(self,info ={}):
+        self.info = info
+
+    @staticmethod
+    def fromBytes(data):
+        info = eval(data[1:].decode())
+        return TrackerRespPacket(info)
+
+    def toBytes(self):
+        type = 2
+        bts = type.to_bytes(length=1, byteorder="big") + \
+                str(self.info).encode()
+        return bts
+
+    def __str__(self):
+        return "Type:{},info:{}".format(2,self.info)
+
+
 if __name__ == '__main__':
-    trp = TrackerReqPacket(1, "31233333")
-    temp = trp.toBytes()
-    print(trp.toBytes())
-    recover = TrackerReqPacket.fromBytes(temp)
+
+    # trp = TrackerReqPacket(1,"31233333")
+    # temp = trp.toBytes()
+    # print(trp.toBytes())
+    # recover = TrackerReqPacket.fromBytes(temp)
+
+    dic = {"aaaa":"zzzz","cccc":[4,5]}
+    temp = str(dic)
+    print(temp)
+    recover_dic = eval(temp)
+    print(type(recover_dic))
+    print(recover_dic["cccc"][0]+1)
+
