@@ -1,5 +1,6 @@
 from Pipe import Pipe
 from TitForTat import TitForTat
+from Packet import ClientReqPacket, Packet, ClientRespPacket
 import threading
 from FileStorage import FileStorage
 import time
@@ -29,7 +30,29 @@ class DownloadTask:
         while True:
             packet = self.pipe.recv()
             self.titfortat.monitoring(packet)
-            # TODO
+            data, cid = packet
+            type = Packet.getType(data)
+            # get request
+            if type == 3:
+                p = ClientReqPacket.fromBytes(data)
+                if p.index == -1:
+                    self.pipe.send(ClientRespPacket(self.fileStorage.haveFilePieces, -1, b'').toBytes(), cid)
+                else:
+                    able = not self.titfortat.isChoking(cid) and self.fileStorage.haveFilePieces(p.index)
+                    if able:
+                        self.pipe.send(ClientRespPacket(self.fileStorage.haveFilePieces, p.index, self.fileStorage.filePieces[p.index]).toBytes(), cid)
+                    else:
+                        self.pipe.send(ClientRespPacket(self.fileStorage.haveFilePieces, -2, b'').toBytes(), cid)
+            # get response
+            elif type == 4:
+                p = ClientRespPacket.fromBytes(data)
+                if p.index == -2:
+                    self.fileStorage.cancel(cid)
+                else:
+                    if p.index != -1:
+                        self.fileStorage.add(p.index, p.data)
+                    if not self.fileStorage.isComplete():
+                        self.pipe.send(ClientReqPacket(self.fileStorage.fid, self.fileStorage.generateRequest(p.haveFilePieces)).toBytes(), cid)
 
     def _autoAsk(self):
         while True:
@@ -39,8 +62,7 @@ class DownloadTask:
             possiblePeers = list(self.peers - self.downloadingPeers)
             if possiblePeers:
                 randomPeerCid = random.choice(possiblePeers)
-                # self.pipe.send()
-                # TODO
+                self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), randomPeerCid)
                 self.downloadingPeers.add(randomPeerCid)
 
 
