@@ -4,6 +4,8 @@ import time
 '''
 职能：速度监控，top4+week维护
 '''
+
+
 class TitForTat:
     def __init__(self):
         self.speed = {}

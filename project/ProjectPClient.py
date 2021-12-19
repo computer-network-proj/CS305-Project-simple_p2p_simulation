@@ -3,6 +3,7 @@ from DownloadTask import DownloadTask
 from FileStorage import FileStorage
 import threading
 
+
 class ProjectPClient(PClient):
 
     def __init__(self, tracker_addr: (str, int), proxy=None, port=None, upload_rate=0, download_rate=0):
@@ -10,7 +11,7 @@ class ProjectPClient(PClient):
 
         self.tasks = []
         threading.Thread(target=self.recvThread()).start()
-        #TODO our init code
+        # TODO our init code
 
     def recvThread(self):
         while True:
@@ -19,7 +20,6 @@ class ProjectPClient(PClient):
     def register(self, file_path: str):
         pass
         # TODO our code
-
 
     def download(self, fid) -> bytes:
         # TODO 这里需要上线程锁
@@ -31,7 +31,6 @@ class ProjectPClient(PClient):
         new_task = DownloadTask(FileStorage.fromFid(fid))
         self.tasks.append(new_task)
         return new_task.getFile()
-
 
     def cancel(self, fid):
         pass

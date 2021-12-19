@@ -7,6 +7,8 @@ import time
 '''
 职能：client对特定文件的维护类
 '''
+
+
 class DownloadTask:
     def __init__(self, fileStorage: FileStorage):
         self.fid = fileStorage.fid
