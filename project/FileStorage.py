@@ -10,11 +10,9 @@ import time
 BLOCK_SIZE = 128 * 1024  # 现为128KB，可能设置16KB
 
 
-
 # 输入数字，生成 8 位字符串
 def generateFidHead(str):
-    return  int(str).to_bytes(length=4, byteorder="big")
-
+    return int(str).to_bytes(length=4, byteorder="big")
 
 
 def MD5(data: bytes):
@@ -251,4 +249,3 @@ if __name__ == '__main__':
         # print(file.generateRequest(temp.haveFilePieces))
         if temp.generateRequest(file.haveFilePieces) == 10:
             print("fail")
-
