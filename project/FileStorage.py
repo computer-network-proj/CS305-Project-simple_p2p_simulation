@@ -10,13 +10,11 @@ import time
 BLOCK_SIZE = 128 * 1024  # 现为128KB，可能设置16KB
 
 
-def generateFidHead(block_num):
-    """
-    输入文件分片数量，生成 8 位字符串
-    :param block_num:
-    :return:
-    """
-    return "%08d" % block_num
+
+# 输入数字，生成 8 位字符串
+def generateFidHead(str):
+    return  int(str).to_bytes(length=4, byteorder="big")
+
 
 
 def MD5(data: bytes):
@@ -80,7 +78,8 @@ class FileStorage:
             promises.append(False)
 
         data_hash = FileStorage.generateFid(data)
-        fid = generateFidHead(block_num) + data_hash
+        fid = generateFidHead(block_num).decode() + data_hash
+
         fileStorage = FileStorage(filePieces=file_pieces, haveFilePieces=have_file_pieces, fid=fid, promises=promises)
 
         return fileStorage
@@ -92,7 +91,8 @@ class FileStorage:
         :param fid: 文件id
         :return: 一个FileStorage对象
         """
-        block_num = int(fid[:8])
+        fid = fid.encode()
+        block_num = int.from_bytes(fid[:4], byteorder="big")
         filePieces = []
         haveFilePieces = []
         promises = []
@@ -101,6 +101,7 @@ class FileStorage:
             haveFilePieces.append(False)
             promises.append(False)
 
+        fid = fid.decode()
         fileStorage = FileStorage(filePieces=filePieces, haveFilePieces=haveFilePieces, promises=promises, fid=fid)
         return fileStorage
 
@@ -113,7 +114,7 @@ class FileStorage:
         for item in self.filePieces:
             checkFile = checkFile + item
         fileHash = MD5(checkFile)
-        return fileHash == self.fid[8:]
+        return fileHash == self.fid[4:]
 
     def getFile(self):
         """
@@ -163,8 +164,9 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: boolean值
         """
-        myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] is True])
-        partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] is True])
+        blockNum = int.from_bytes(self.fid.encode()[:4], byteorder="big")
+        myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] is True])
+        partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] is True])
         return len(partnerPieces - myPieces) > 0
 
     def isInterested(self, haveFilePiecesOffered):
@@ -173,8 +175,11 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: boolean值
         """
-        myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] is True])
-        partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] is True])
+
+        blockNum = int.from_bytes(self.fid.encode()[:4], byteorder="big")
+        myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
+        partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
+
         return len(myPieces - partnerPieces) > 0
 
     def generateRequest(self, haveFilePiecesOffered):
@@ -183,8 +188,11 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: 文件片段index。如果找不到，返回-1
         """
-        myPieces = set([i for i in range(int(self.fid[:8])) if self.haveFilePieces[i] is True])
-        partnerPieces = set([i for i in range(int(self.fid[:8])) if haveFilePiecesOffered[i] is True])
+
+        blockNum = int.from_bytes(self.fid.encode()[:4], byteorder="big")
+        myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
+        partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
+
         difference = partnerPieces.difference(myPieces)
         difference = list(difference)
         if len(difference) == 0:
@@ -199,7 +207,7 @@ if __name__ == '__main__':
     # file_path = '../test_files/alice.txt'
     file_path = '../test_files/bg.png'
     file = FileStorage.fromPath(file_path)
-    print(file.filePieces)
+    # print(file.filePieces)
     b = b""
     for item in file.filePieces:
         b = b + item
@@ -211,12 +219,14 @@ if __name__ == '__main__':
     fid_new = FileStorage.generateFid(data_new)
     print(file.fid)
     print(fid_new)
-    if data_new == b and fid_new == file.fid[8:]:
+    if data_new == b and fid_new == file.fid[4:]:
         print("成功")
     else:
         print("失败")
 
-    temp = FileStorage.fromFid("00000048")
+    fid = file.fid
+    temp = FileStorage.fromFid(fid)
+
     print(file.isComplete())
     print(temp.isComplete())
 
@@ -241,35 +251,4 @@ if __name__ == '__main__':
         # print(file.generateRequest(temp.haveFilePieces))
         if temp.generateRequest(file.haveFilePieces) == 10:
             print("fail")
-    # a = '123absg'
-    # b = time.time()
-    # c = '%s|%s' % (a, b)
-    # print(c)
-    # m = hashlib.md5()  # 调用hashlib里的md5()生成一个md5 hash对象
-    # m.update(bytes(c, encoding='utf8'))  # 用update方法对字符串进行md5加密的更新处理
-    #
-    # result = m.hexdigest()  # 得出加密后的十六进制结果
-    # print(result)
-    #
-    # print("---------------------------")
-    # # 客户端
-    # res = '%s|%s' % (result, b)
-    # print(res)
-    # # 服务端
-    # get_result, get_time = res.split('|')
-    # print(get_result)
-    # print(b)
-    # d = '%s|%s' % (a, get_time)  # 服务端将a和拿到的get_time进行拼接
-    # n = hashlib.md5()
-    # n.update(bytes(d, encoding='utf8'))  # 对拼接后的结果进行md5加密
-    # s_result = m.hexdigest()  # 得出加密后的结果
-    # print(s_result)
-    # if s_result == get_result:  # 对比客户端传递过来的结果和服务端拼接加密后的结果进行比对
-    #     print('验证通过')
 
-    # def MD5(self,filepath):
-    #     with open(filepath, 'rb') as f:
-    #         md5obj = hashlib.md5()
-    #         md5obj.update(f.read())
-    #         hash = md5obj.hexdigest()
-    #         return hash
