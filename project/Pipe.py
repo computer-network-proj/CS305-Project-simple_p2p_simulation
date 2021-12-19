@@ -1,4 +1,5 @@
 from queue import SimpleQueue
+import time
 
 '''
 职能：构造send_queue和recv_queue进行代理。
@@ -6,14 +7,15 @@ from queue import SimpleQueue
 
 
 class Pipe:
-    def __init__(self):
-        self.send_queue = SimpleQueue()
+    def __init__(self, send_func):
         self.recv_queue = SimpleQueue()
+        self.send_func = send_func
 
-    def send(self, data, address):
-        pass
-        # TODO
+    def send(self, data: bytes, dst: (str, int)):
+        self.send_func(data, dst)
 
     def recv(self, timeout=None) -> (bytes, (str, int)):
-        pass
-        # TODO
+        while True:
+            time.sleep(0.001)
+            if self.recv_queue:
+                return self.recv_queue.get_nowait()

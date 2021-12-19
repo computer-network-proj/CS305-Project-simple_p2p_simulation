@@ -23,8 +23,12 @@ class ProjectPClient(PClient):
 
     def recvThread(self):
         while self.active:
-            packet, identification = self.__recv__()
-
+            packet, cid = self.__recv__()
+            packetType = Packet.getType(packet)
+            if packetType == 2:
+                pass
+            if packetType == 4:
+                pass
             print(str(self.proxy.port)+ " " + TrackerRespPacket.fromBytes(packet).__str__()+"\n",end="")
 
     def register(self, file_path: str):
@@ -33,7 +37,6 @@ class ProjectPClient(PClient):
         packet = TrackerReqPacket.newRegister(fileStorage.fid)
         packet = packet.toBytes()
         self.__send__(packet,self.tracker)
-
         # TODO our code
 
     def download(self, fid) -> bytes:
@@ -43,7 +46,7 @@ class ProjectPClient(PClient):
             if task.fid == fid:
                 return task.get_file()
         # else:
-        new_task = DownloadTask(FileStorage.fromFid(fid))
+        new_task = DownloadTask(FileStorage.fromFid(fid), self.__send__)
         self.tasks.append(new_task)
         return new_task.getFile()
 
@@ -82,6 +85,5 @@ if __name__ == '__main__':
     PC1.close()
     PC2.close()
     PC3.close()
-    # print(len(b'000000481783c1907f8a1b5225abdbc0b395ad93'))
 
 
