@@ -138,6 +138,7 @@ class FileStorage:
         :param index: 文件片段index
         :param cid: client对象的id
         """
+
         self.promisesMap[cid] = index
         self.promises[index] = True
 
