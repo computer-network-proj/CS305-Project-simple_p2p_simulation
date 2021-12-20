@@ -25,7 +25,7 @@ class ProjectPClient(PClient):
         while self.active:
             packet, cid = self.__recv__()
             packetType = Packet.getType(packet)
-            print(str(self.proxy.port) + " " + TrackerRespPacket.fromBytes(packet).__str__() + "\n", end="")
+            # print(str(self.proxy.port) + " " + TrackerRespPacket.fromBytes(packet).__str__() + "\n", end="")
 
             fid = Packet.getFid(packet)
             if fid  in self.tasks.keys():
@@ -36,10 +36,6 @@ class ProjectPClient(PClient):
     def register(self, file_path: str):
         fileStorage = FileStorage.fromPath(file_path)
         # packet = TrackerPacket.generatePacket(TrackerOperation.REGISTER,byteFid)
-        packet = TrackerReqPacket.newRegister(fileStorage.fid)
-        packet = packet.toBytes()
-        self.__send__(packet, self.tracker)
-
         fid = fileStorage.fid
         if fid in self.tasks:
             self.tasks[fid].fileStorage = fileStorage
@@ -47,16 +43,27 @@ class ProjectPClient(PClient):
             new_task = DownloadTask(fileStorage, self.__send__)
             self.tasks[fid] = new_task
 
+        packet = TrackerReqPacket.newRegister(fileStorage.fid)
+        packet = packet.toBytes()
+        self.__send__(packet, self.tracker)
+        return fid
+
         # TODO our code
 
     def download(self, fid) -> bytes:
         # TODO 这里需要上线程锁
         # if task already exists:
+
         if fid in self.tasks:
             return self.tasks[fid].get_file()
-        # else:
+
         new_task = DownloadTask(FileStorage.fromFid(fid), self.__send__)
         self.tasks[fid] = new_task
+
+        packet = TrackerReqPacket.newDownload(fid)
+        packet = packet.toBytes()
+        self.__send__(packet, self.tracker)
+
         return new_task.getFile()
 
     def cancel(self, fid):

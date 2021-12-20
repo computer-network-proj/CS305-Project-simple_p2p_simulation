@@ -72,6 +72,7 @@ class TrackerRespPacket(Packet):
     @staticmethod
     def fromBytes(data):
         fid = Packet.getFid(data)
+        tmp = data[37:].decode()
         info = eval(data[37:].decode())
         return TrackerRespPacket(fid, info)
 
@@ -94,14 +95,14 @@ class ClientReqPacket(Packet):
     @staticmethod
     def fromBytes(data):
         fid = Packet.getFid(data)
-        index = int.from_bytes(data[37:], byteorder="big")
+        index = int.from_bytes(data[37:], byteorder="big") - 100
         return ClientReqPacket(fid, index)
 
     def toBytes(self):
         type = 3
         bts = type.to_bytes(length=1, byteorder="big") + \
               self.fid.encode() + \
-              self.index.to_bytes(length=4, byteorder="big")
+              (self.index + 100).to_bytes(length=4, byteorder="big")
         return bts
 
 
@@ -136,7 +137,7 @@ class ClientRespPacket(Packet):
     def fromBytes(data):
         fid = Packet.getFid(data)
         headLength = int.from_bytes(data[37:41], byteorder="big")
-        index = int.from_bytes(data[41:45], byteorder="big")
+        index = int.from_bytes(data[41:45], byteorder="big") - 100
         haveFilePieces = ClientRespPacket.Bytes2BoolList(data[45:45 + headLength // 8 + 1])
         ddata = data[45 + headLength // 8 + 1:]
         return ClientRespPacket(fid, haveFilePieces, index, ddata)
@@ -146,7 +147,7 @@ class ClientRespPacket(Packet):
         bts = type.to_bytes(length=1, byteorder="big") + \
               self.fid.encode() + \
               self.headLength.to_bytes(length=4, byteorder="big") + \
-              self.index.to_bytes(length=4, byteorder="big") + \
+              (self.index + 100).to_bytes(length=4, byteorder="big") + \
               ClientRespPacket.BoolList2Bytes(self.haveFilePieces, self.headLength) + \
               self.data
         return bts

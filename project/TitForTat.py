@@ -13,8 +13,8 @@ class TitForTat:
         self.top4 = []
         self.weak = None
         self.operating = []
-        threading.Thread(target=self._updateWeak()).start()
-        threading.Thread(target=self._monitoring_thread()).start()
+        threading.Thread(target=self._updateWeak).start()
+        threading.Thread(target=self._monitoring_thread).start()
 
     def monitoring(self, packet):
         """
@@ -51,6 +51,8 @@ class TitForTat:
         :param cid:
         :return:
         """
+        if cid in self.top4:
+            return True
         if len(self.top4) < 4:
             self.top4.append(cid)
             return True
@@ -76,6 +78,7 @@ class TitForTat:
         """
         while True:
             time.sleep(30)
+
             weakest_in_top4 = min(self.top4, key=lambda c: self.speed[c])
             if self.speed[self.weak] > self.speed[weakest_in_top4]:
                 self.top4.remove(weakest_in_top4)

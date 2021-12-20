@@ -41,14 +41,14 @@ class DownloadTask:
             elif type == 3:
                 p = ClientReqPacket.fromBytes(data)
                 if p.index == -1:
-                    self.pipe.send(ClientRespPacket(self.fileStorage.haveFilePieces, -1, b'').toBytes(), cid)
+                    self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, -1, b'').toBytes(), cid)
                 else:
                     self.titfortat.tryRegister(cid)
-                    able = not self.titfortat.isChoking(cid) and self.fileStorage.haveFilePieces(p.index)
+                    able = not self.titfortat.isChoking(cid) and self.fileStorage.haveFilePieces[p.index]
                     if able:
-                        self.pipe.send(ClientRespPacket(self.fileStorage.haveFilePieces, p.index, self.fileStorage.filePieces[p.index]).toBytes(), cid)
+                        self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, p.index, self.fileStorage.filePieces[p.index]).toBytes(), cid)
                     else:
-                        self.pipe.send(ClientRespPacket(self.fileStorage.haveFilePieces, -2, b'').toBytes(), cid)
+                        self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, -2, b'').toBytes(), cid)
             # get response
             elif type == 4:
                 p = ClientRespPacket.fromBytes(data)
