@@ -57,6 +57,7 @@ class DownloadTask:
                     self.downloadingPeers.remove(cid)
                 else:
                     if p.index != -1:
+                        # print()
                         self.fileStorage.add(p.index, p.data)
                     if not self.fileStorage.isComplete():
                         self.pipe.send(ClientReqPacket(self.fileStorage.fid, self.fileStorage.generateRequest(p.haveFilePieces)).toBytes(), cid)
