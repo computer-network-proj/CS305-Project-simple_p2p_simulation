@@ -32,8 +32,9 @@ class ProjectPClient(PClient):
             if fid in self.tasks.keys():
                 self.tasks[fid].pipe.recv_queue.put((packet,cid))
                 if packetType == 4:
-                    pieces = self.tasks[fid].fileStorage.haveFilePieces
-                    print(str(self.proxy.port) + " " + str(round(sum(pieces) / len(pieces), 5)) + "\n", end="")
+                    self.tasks[fid].fileStorage.display()
+                    # pieces = self.tasks[fid].fileStorage.haveFilePieces
+                    # print(str(self.proxy.port) + " " + str(round(sum(pieces) / len(pieces), 5)) + "\n", end="")
             else:
                 print("miss")
 

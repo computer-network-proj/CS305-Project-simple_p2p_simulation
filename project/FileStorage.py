@@ -135,7 +135,7 @@ class FileStorage:
         """
         self.filePieces[index] = data
         self.haveFilePieces[index] = True
-        self.promises[index] = True
+        self.promises[index] = False
 
     def cancel(self, cid):
         """
@@ -207,6 +207,17 @@ class FileStorage:
             return -1
         else:
             return random.sample(difference, 1)[0]
+
+    def display(self):
+        string = ''
+        for i in range(len(self.haveFilePieces)):
+            if self.haveFilePieces[i]:
+                string += '#'
+            elif self.promises[i]:
+                string += '~'
+            else:
+                string += '-'
+        print(string)
 
 
 if __name__ == '__main__':

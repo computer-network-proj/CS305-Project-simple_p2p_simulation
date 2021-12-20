@@ -9,7 +9,7 @@ if __name__ == '__main__':
     B = PClient(tracker_address)
 
     # A register a file and B download it
-    fid = A.register("../test_files/bg.png")
+    fid = A.register("../test_files/big_alice.txt")
     data1 = B.download(fid)
     # print("111")
     # A cancel the register of the file

@@ -75,6 +75,7 @@ class DownloadTask:
 
     def _autoAsk(self):
         while not self.closed:
+            self.fileStorage.display()
             if self.fileStorage.isComplete():
                 return
             time.sleep(1)
