@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     clients = [B, C, D, E]
     # A register a file and B download it
-    fid = A.register("../test_files/bg.png")
+    fid = A.register("../test_files/giant_alice.txt")
     threads = []
     files = {}
 
@@ -35,12 +35,13 @@ if __name__ == '__main__':
     for t in threads:
         t.join()
     # check the downloaded files
-    with open("../test_files/bg.png", "rb") as bg:
+    with open("../test_files/giant_alice.txt", "rb") as bg:
         bs = bg.read()
         for i in files:
             if files[i] != bs:
                 raise Exception("Downloaded file is different with the original one")
 
+    # exit()
     # B, C, D, E has completed the download of file
     threads.clear()
     print("-------------------------------")
