@@ -9,14 +9,15 @@ if __name__ == '__main__':
     # f2.add(1, ClientRespPacket(f.fid, [True, True], 1, f.filePieces[1]).data)
     # print(f2.isComplete())
 
-    s = set()
-    s.add("1")
-    s.add("2")
-    temp  =str(s).encode().decode()
-    temp1 = eval(temp)
-    print(type(temp1))
-    print(temp1)
+    # s = set()
+    # s.add("00000001")
+    # s.add("2")
+    # temp  =str(s).encode().decode()
+    # temp1 = eval(temp)
+    # print(type(temp1))
+    # print(temp1)
     # print(bytes(s))
     # print(set(bytes(s)))
 
+    print(int("00000001"))
 

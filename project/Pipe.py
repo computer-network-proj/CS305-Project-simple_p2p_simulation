@@ -16,6 +16,8 @@ class Pipe:
 
     def recv(self, timeout=None) -> (bytes, (str, int)):
         while True:
-            time.sleep(0.001)
-            if self.recv_queue:
+
+            if not self.recv_queue.empty():
                 return self.recv_queue.get_nowait()
+            else:
+                time.sleep(0.001)

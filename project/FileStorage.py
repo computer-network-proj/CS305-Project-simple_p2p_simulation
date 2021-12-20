@@ -7,7 +7,7 @@ import os
 import random
 import time
 
-BLOCK_SIZE = 128 * 1024  # 现为128KB，可能设置16KB
+BLOCK_SIZE = 32 * 1024  # 现为128KB，可能设置16KB
 
 
 # 输入数字，生成 8 位字符串
@@ -75,7 +75,8 @@ class FileStorage:
             promises.append(False)
 
         data_hash = FileStorage.generateFid(data)
-        fid = generateFidHead(block_num).decode() + data_hash
+        header =generateFidHead(block_num)
+        fid = header.decode() + data_hash
 
         fileStorage = FileStorage(filePieces=file_pieces, haveFilePieces=have_file_pieces, fid=fid, promises=promises)
 
