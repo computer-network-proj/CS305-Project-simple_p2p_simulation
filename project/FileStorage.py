@@ -7,7 +7,7 @@ import os
 import random
 import time
 
-BLOCK_SIZE = 32 * 1024  # 现为128KB，可能设置16KB
+BLOCK_SIZE = 16 * 1024  # 现为128KB，可能设置16KB
 
 
 # 输入数字，生成 8 位字符串
@@ -167,23 +167,24 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: boolean值
         """
+        have_temp = [ self.haveFilePieces[i] or self.promises[i] for i in range(len(self.haveFilePieces))]
         blockNum = int.from_bytes(self.fid[:4], byteorder="big")
-        myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] is True])
+        myPieces = set([i for i in range(blockNum) if have_temp[i] is True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] is True])
         return len(partnerPieces - myPieces) > 0
 
-    def isInterested(self, haveFilePiecesOffered):
-        """
-        对方对我是否感兴趣
-        :param haveFilePiecesOffered: 对方的haveFilePieces数组
-        :return: boolean值
-        """
-
-        blockNum = int.from_bytes(self.fid[:4], byteorder="big")
-        myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
-        partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
-
-        return len(myPieces - partnerPieces) > 0
+    # def isInterested(self, haveFilePiecesOffered):
+    #     """
+    #     对方对我是否感兴趣
+    #     :param haveFilePiecesOffered: 对方的haveFilePieces数组
+    #     :return: boolean值
+    #     """
+    #
+    #     blockNum = int.from_bytes(self.fid[:4], byteorder="big")
+    #     myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
+    #     partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
+    #
+    #     return len(myPieces - partnerPieces) > 0
 
     def generateRequest(self, haveFilePiecesOffered):
         """.
@@ -211,6 +212,7 @@ class FileStorage:
     def display(self):
         string = ''
         for i in range(len(self.haveFilePieces)):
+            if i % 10 == 0: string += ' '
             if self.haveFilePieces[i]:
                 string += '#'
             elif self.promises[i]:
@@ -260,10 +262,10 @@ if __name__ == '__main__':
     temp.add(12, b"asdasdasd")
 
     # NOTE: test isInteresting and isInterested
-    print(file.isInterested(temp.haveFilePieces))
-    print(file.isInteresting(temp.haveFilePieces))
-    print(temp.isInterested(file.haveFilePieces))
-    print(temp.isInteresting(file.haveFilePieces))
+    # print(file.isInterested(temp.haveFilePieces))
+    # print(file.isInteresting(temp.haveFilePieces))
+    # print(temp.isInterested(file.haveFilePieces))
+    # print(temp.isInteresting(file.haveFilePieces))
 
     # NOTE:test generateRequest
     for i in range(500):

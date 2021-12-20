@@ -32,9 +32,11 @@ class ProjectPClient(PClient):
             if fid in self.tasks.keys():
                 self.tasks[fid].pipe.recv_queue.put((packet,cid))
                 if packetType == 4:
+                    pass
                     # self.tasks[fid].fileStorage.display()
-                    pieces = self.tasks[fid].fileStorage.haveFilePieces
-                    print(str(self.proxy.port) + " " + str(round(sum(pieces) / len(pieces), 5)) + "\n", end="")
+                    # pieces = self.tasks[fid].fileStorage.haveFilePieces
+                    # print(str(cid[1]) + ' > ' + str(self.proxy.port) + " " + str(round(sum(pieces) / len(pieces), 5)) + "\n", end="")
+                    # # print(self.tasks[fid].fileStorage.display())
             else:
                 print("miss")
 
@@ -47,7 +49,7 @@ class ProjectPClient(PClient):
         if fid in self.tasks:
             self.tasks[fid].fileStorage = fileStorage
         else:
-            new_task = DownloadTask(fileStorage, self.__send__)
+            new_task = DownloadTask(fileStorage, self.__send__, selfPort=self.proxy.port)
             self.tasks[fid] = new_task
 
         packet = TrackerReqPacket.newRegister(fileStorage.fid)
@@ -64,7 +66,7 @@ class ProjectPClient(PClient):
         if fid in self.tasks:
             return self.tasks[fid].get_file()
 
-        new_task = DownloadTask(FileStorage.fromFid(fid), self.__send__)
+        new_task = DownloadTask(FileStorage.fromFid(fid), self.__send__, selfPort=self.proxy.port)
         self.tasks[fid] = new_task
 
         packet = TrackerReqPacket.newDownload(fid)

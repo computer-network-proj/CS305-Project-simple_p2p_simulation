@@ -40,7 +40,8 @@ class Proxy:
                 # print(packet)
                 self.socket.sendto(packet, dst)
             else:
-                time.sleep(0.000001)
+                time.sleep(0.0000001)
+                # pass
 
     def __buffer_thread__(self):
         while self.active:

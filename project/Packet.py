@@ -105,6 +105,9 @@ class ClientReqPacket(Packet):
               (self.index + 100).to_bytes(length=4, byteorder="big")
         return bts
 
+    def __str__(self):
+        return f'Type:3,index:{self.index}'
+
 
 class ClientRespPacket(Packet):
     def __init__(self, fid, haveFilePieces, index, data):
@@ -151,6 +154,9 @@ class ClientRespPacket(Packet):
               ClientRespPacket.BoolList2Bytes(self.haveFilePieces, self.headLength) + \
               self.data
         return bts
+
+    def __str__(self):
+        return f'Type:4,index:{self.index}'
 
 
 if __name__ == '__main__':
