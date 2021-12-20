@@ -142,9 +142,11 @@ class FileStorage:
         取消一个client对象的承诺。
         :param cid: client对象的id
         """
-        self.promises[self.promisesMap[cid]] = False
-        self.promisesMap.pop(cid)
-        pass
+        if cid in self.promisesMap.keys():
+            popSet = self.promisesMap.pop(cid)
+            for index in popSet:
+                self.promises[index] = False
+
 
     def promise(self, index, cid):
         """
@@ -152,8 +154,11 @@ class FileStorage:
         :param index: 文件片段index
         :param cid: client对象的id
         """
-
-        self.promisesMap[cid] = index
+        if cid not in self.promisesMap.keys():
+            self.promisesMap[cid] =set()
+            self.promisesMap[cid].add(index)
+        else:
+            self.promisesMap[cid].add(index)
         self.promises[index] = True
 
     def isInteresting(self, haveFilePiecesOffered):
@@ -181,7 +186,8 @@ class FileStorage:
         return len(myPieces - partnerPieces) > 0
 
     def generateRequest(self, haveFilePiecesOffered):
-        """
+        """.
+
         随机寻找一个未被下载的文件片
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: 文件片段index。如果找不到，返回-1
@@ -191,8 +197,11 @@ class FileStorage:
         blockNum = int.from_bytes(self.fid[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
+        myPromises = set([i for i in range(blockNum) if self.promises[i] == True])
 
-        difference = partnerPieces.difference(myPieces)
+
+        difference = partnerPieces - myPieces
+        difference = difference - myPromises
         difference = list(difference)
         if len(difference) == 0:
             return -1

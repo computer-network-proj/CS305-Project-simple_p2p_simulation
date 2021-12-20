@@ -57,16 +57,27 @@ class DownloadTask:
                     self.downloadingPeers.remove(cid)
                 else:
                     if p.index != -1:
-                        # print()
+                        if self.fileStorage.haveFilePieces[p.index]: continue
                         self.fileStorage.add(p.index, p.data)
-                    if not self.fileStorage.isComplete():
-                        self.pipe.send(ClientReqPacket(self.fileStorage.fid, self.fileStorage.generateRequest(p.haveFilePieces)).toBytes(), cid)
+                    if self.fileStorage.isInteresting(p.haveFilePieces):
+                        chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces)
+                        if chosenIndex == -1: continue
+                        print('chosenIndex', chosenIndex)
+                        self.fileStorage.promise(chosenIndex, cid)
+                        self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
+
+                        chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces)
+                        if chosenIndex == -1: continue
+                        print('chosenIndex', chosenIndex)
+                        self.fileStorage.promise(chosenIndex, cid)
+                        self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
+
 
     def _autoAsk(self):
         while not self.closed:
             if self.fileStorage.isComplete():
                 return
-            time.sleep(0.1)
+            time.sleep(1)
             possiblePeers = list(self.peers - self.downloadingPeers)
             if possiblePeers:
                 randomPeerCid = random.choice(possiblePeers)
