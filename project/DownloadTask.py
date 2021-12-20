@@ -23,6 +23,9 @@ class DownloadTask:
         threading.Thread(target=self.run).start()
         threading.Thread(target=self._autoAsk).start()
 
+    def close(self):
+        self.closed = True
+
     def run(self):
         """
         实现recv的核心线程
@@ -62,23 +65,22 @@ class DownloadTask:
                     if self.fileStorage.isInteresting(p.haveFilePieces):
                         chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces)
                         if chosenIndex == -1: continue
-                        print('chosenIndex', chosenIndex)
                         self.fileStorage.promise(chosenIndex, cid)
                         self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
 
-                        chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces)
-                        if chosenIndex == -1: continue
-                        print('chosenIndex', chosenIndex)
-                        self.fileStorage.promise(chosenIndex, cid)
-                        self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
+                        # if self.pipe.recv_queue.qsize() > 0: continue
+                        if len(self.fileStorage.promisesMap[cid]) < 999999:
+                            chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces)
+                            if chosenIndex == -1: continue
+                            self.fileStorage.promise(chosenIndex, cid)
+                            self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
 
 
     def _autoAsk(self):
         while not self.closed:
-            self.fileStorage.display()
             if self.fileStorage.isComplete():
                 return
-            time.sleep(1)
+            time.sleep(0.1)
             possiblePeers = list(self.peers - self.downloadingPeers)
             if possiblePeers:
                 randomPeerCid = random.choice(possiblePeers)

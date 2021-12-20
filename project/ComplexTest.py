@@ -8,11 +8,11 @@ tracker_address = ("127.0.0.1", 10086)
 
 if __name__ == '__main__':
     # A,B,C,D,E join the network
-    A = PClient(tracker_address)
-    B = PClient(tracker_address)
-    C = PClient(tracker_address)
-    D = PClient(tracker_address)
-    E = PClient(tracker_address)
+    A = PClient(tracker_address, upload_rate=2000000, download_rate=500000, port=10091)
+    B = PClient(tracker_address, upload_rate=500000, download_rate= 1000000, port=10092)
+    C = PClient(tracker_address, upload_rate=1000000, download_rate=500000, port=10093)
+    D = PClient(tracker_address, upload_rate=700000, download_rate=400000,  port=10094)
+    E = PClient(tracker_address, upload_rate=2000000, download_rate=7000000, port=10095)
 
     clients = [B, C, D, E]
     # A register a file and B download it
