@@ -1,6 +1,6 @@
 import time
 
-from Packet import TrackerReqPacket, Packet, TrackerRespPacket
+from Packet import TrackerReqPacket, Packet, TrackerRespPacket, ClientRespPacket
 from PClient import PClient
 from DownloadTask import DownloadTask
 from FileStorage import FileStorage
@@ -25,11 +25,17 @@ class ProjectPClient(PClient):
         while self.active:
             packet, cid = self.__recv__()
             packetType = Packet.getType(packet)
-            # print(str(self.proxy.port) + " " + TrackerRespPacket.fromBytes(packet).__str__() + "\n", end="")
+
+
 
             fid = Packet.getFid(packet)
-            if fid  in self.tasks.keys():
+            if fid in self.tasks.keys():
                 self.tasks[fid].pipe.recv_queue.put((packet,cid))
+                if packetType == 4:
+                    pieces = self.tasks[fid].fileStorage.haveFilePieces
+                    print(str(self.proxy.port) + " " + str(round(sum(pieces) / len(pieces), 5)) + "\n", end="")
+            else:
+                print("miss")
 
 
 

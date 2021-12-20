@@ -78,7 +78,9 @@ class TitForTat:
         """
         while True:
             time.sleep(30)
-
+            print(self.top4)
+            if self.weak is None:
+                continue
             weakest_in_top4 = min(self.top4, key=lambda c: self.speed[c])
             if self.speed[self.weak] > self.speed[weakest_in_top4]:
                 self.top4.remove(weakest_in_top4)

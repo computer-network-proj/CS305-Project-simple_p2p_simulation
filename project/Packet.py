@@ -13,7 +13,7 @@ class Packet:
 
     @staticmethod
     def getFid(data):
-        return data[1:37].decode()
+        return data[1:37]
 
     @abstractmethod
     def toBytes(self):
@@ -44,7 +44,7 @@ class TrackerReqPacket(Packet):
 
     @staticmethod
     def newClose():
-        return TrackerReqPacket(4, "0"*36)
+        return TrackerReqPacket(4, b"0"*36)
 
     @staticmethod
     def fromBytes(data):
@@ -56,7 +56,7 @@ class TrackerReqPacket(Packet):
     def toBytes(self):
         type = 1
         bts = type.to_bytes(length=1, byteorder="big") + \
-              self.fid.encode() + \
+              self.fid + \
               self.op.to_bytes(length=1, byteorder="big")
         return bts
 
@@ -79,7 +79,7 @@ class TrackerRespPacket(Packet):
     def toBytes(self):
         type = 2
         bts = type.to_bytes(length=1, byteorder="big") + \
-              self.fid.encode() + \
+              self.fid + \
               str(self.info).encode()
         return bts
 
@@ -101,7 +101,7 @@ class ClientReqPacket(Packet):
     def toBytes(self):
         type = 3
         bts = type.to_bytes(length=1, byteorder="big") + \
-              self.fid.encode() + \
+              self.fid + \
               (self.index + 100).to_bytes(length=4, byteorder="big")
         return bts
 
@@ -145,7 +145,7 @@ class ClientRespPacket(Packet):
     def toBytes(self):
         type = 4
         bts = type.to_bytes(length=1, byteorder="big") + \
-              self.fid.encode() + \
+              self.fid + \
               self.headLength.to_bytes(length=4, byteorder="big") + \
               (self.index + 100).to_bytes(length=4, byteorder="big") + \
               ClientRespPacket.BoolList2Bytes(self.haveFilePieces, self.headLength) + \

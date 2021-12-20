@@ -50,8 +50,8 @@ class FileStorage:
         """
         md5obj = hashlib.md5()
         md5obj.update(data)
-        fid = md5obj.hexdigest()
-        return fid
+        fileHash = md5obj.hexdigest()
+        return fileHash
 
     @staticmethod
     def fromPath(path: str):
@@ -76,7 +76,7 @@ class FileStorage:
 
         data_hash = FileStorage.generateFid(data)
         header =generateFidHead(block_num)
-        fid = header.decode() + data_hash
+        fid = header + data_hash.encode()
 
         fileStorage = FileStorage(filePieces=file_pieces, haveFilePieces=have_file_pieces, fid=fid, promises=promises)
 
@@ -89,7 +89,7 @@ class FileStorage:
         :param fid: 文件id
         :return: 一个FileStorage对象
         """
-        fid = fid.encode()
+        # fid = fid.encode()
         block_num = int.from_bytes(fid[:4], byteorder="big")
         filePieces = []
         haveFilePieces = []
@@ -99,7 +99,7 @@ class FileStorage:
             haveFilePieces.append(False)
             promises.append(False)
 
-        fid = fid.decode()
+        # fid = fid.decode()
         fileStorage = FileStorage(filePieces=filePieces, haveFilePieces=haveFilePieces, promises=promises, fid=fid)
         return fileStorage
 
@@ -112,7 +112,7 @@ class FileStorage:
         for item in self.filePieces:
             checkFile = checkFile + item
         fileHash = MD5(checkFile)
-        return fileHash == self.fid[4:]
+        return fileHash.encode() == self.fid[4:]
 
     def getFile(self):
         """
@@ -162,7 +162,7 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: boolean值
         """
-        blockNum = int.from_bytes(self.fid.encode()[:4], byteorder="big")
+        blockNum = int.from_bytes(self.fid[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] is True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] is True])
         return len(partnerPieces - myPieces) > 0
@@ -174,7 +174,7 @@ class FileStorage:
         :return: boolean值
         """
 
-        blockNum = int.from_bytes(self.fid.encode()[:4], byteorder="big")
+        blockNum = int.from_bytes(self.fid[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
 
@@ -186,8 +186,9 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: 文件片段index。如果找不到，返回-1
         """
-
-        blockNum = int.from_bytes(self.fid.encode()[:4], byteorder="big")
+        #FIXME promise
+        #BUG
+        blockNum = int.from_bytes(self.fid[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
 
@@ -214,7 +215,7 @@ if __name__ == '__main__':
     size = os.path.getsize(file_path)
     data_new = bin_file.read()
     bin_file.close()
-    fid_new = FileStorage.generateFid(data_new)
+    fid_new = FileStorage.generateFid(data_new).encode()
     print(file.fid)
     print(fid_new)
     if data_new == b and fid_new == file.fid[4:]:
@@ -224,7 +225,7 @@ if __name__ == '__main__':
 
     fid = file.fid
     temp = FileStorage.fromFid(fid)
-
+    print(file.fid)
     print(file.isComplete())
     print(temp.isComplete())
 
