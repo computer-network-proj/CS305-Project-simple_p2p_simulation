@@ -26,19 +26,19 @@ class ProjectPClient(PClient):
             packet, cid = self.__recv__()
             packetType = Packet.getType(packet)
 
-
-
             fid = Packet.getFid(packet)
             if fid in self.tasks.keys():
-                self.tasks[fid].pipe.recv_queue.put((packet,cid))
+                self.tasks[fid].pipe.recv_queue.put((packet, cid))
                 if packetType == 4:
-                    # self.tasks[fid].fileStorage.display()
+                    self.tasks[fid].fileStorage.display()
                     pieces = self.tasks[fid].fileStorage.haveFilePieces
-                    print(str(self.proxy.port) + " " + str(round(sum(pieces) / len(pieces), 5)) + "\n", end="")
+                    print(str(cid[1]) + " > " + str(self.proxy.port) + " " + str(
+                        round(sum(pieces) / len(pieces), 5)) +"\n", end="")
+                    # + str(self.tasks[fid].peers)
             else:
                 print("miss")
-
-
+                print(str(cid[1]) + " > " + str(self.proxy.port))
+                print(self.tasks.keys())
 
     def register(self, file_path: str):
         fileStorage = FileStorage.fromPath(file_path)
@@ -89,7 +89,7 @@ class ProjectPClient(PClient):
         self.__send__(packet, self.tracker)
 
         temp = self.tasks
-        self.tasks ={}
+        self.tasks = {}
         for key in temp.keys():
             temp[key].close()
         # TODO our code

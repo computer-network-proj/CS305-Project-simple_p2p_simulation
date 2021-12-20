@@ -15,5 +15,4 @@
 
 
 if __name__ == '__main__':
-    d = {}
-    print(d['1'])
+    print(bool([]))

@@ -23,7 +23,7 @@ class TitForTat:
         :param packet:
         """
         data, cid = packet
-        if Packet.Packet.getType(data) == 4:  # TODO: 设置具体需要监测包的类型
+        if Packet.Packet.getType(data) == 4:
             self.operating.append(cid)
 
     def _monitoring_thread(self):
@@ -32,18 +32,17 @@ class TitForTat:
         使用滑动平均计算每秒收到包数
         :return:
         """
-        decay = 0.5
+        decay = 0
         while True:
             time.sleep(1)
             for cid in self.speed:
-                self.speed[cid] *= decay
+                self.speed[cid] = 0 if self.speed[cid] < 0.001 else self.speed[cid] * decay
             for o in self.operating:
                 if o not in self.speed:
                     self.speed[o] = 0
             for o in self.operating:
                 self.speed[o] += 1 - decay
             self.operating.clear()
-            print(self.speed)
 
     def tryRegister(self, cid):
         """
@@ -53,16 +52,21 @@ class TitForTat:
         :param cid:
         :return:
         """
+        for c in self.top4:
+            if self.speed[c] == 0:
+                self.top4.remove(c)
+        if cid not in self.speed:
+            self.speed[cid] = 0
         if cid in self.top4:
             return True
         if len(self.top4) < 4:
             self.top4.append(cid)
             return True
         else:
-            print(self.top4)
-            print(self.speed)
             weakest_in_top4 = min(self.top4, key=lambda c: self.speed[c])
             if self.speed[cid] > self.speed[weakest_in_top4]:
+                if cid not in self.speed:
+                    self.speed[cid] = 0
                 self.top4.remove(weakest_in_top4)
                 self.top4.append(cid)
                 return True
