@@ -214,7 +214,7 @@ class FileStorage:
             if self.haveFilePieces[i]:
                 string += '#'
             elif self.promises[i]:
-                string += '~'
+                string += '+'
             else:
                 string += '-'
         print(string)

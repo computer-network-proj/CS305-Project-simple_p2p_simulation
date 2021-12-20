@@ -40,8 +40,10 @@ class TitForTat:
             for o in self.operating:
                 if o not in self.speed:
                     self.speed[o] = 0
-                self.speed[o] += (1 - decay) * self.speed[o]
+            for o in self.operating:
+                self.speed[o] += 1 - decay
             self.operating.clear()
+            print(self.speed)
 
     def tryRegister(self, cid):
         """
@@ -57,6 +59,8 @@ class TitForTat:
             self.top4.append(cid)
             return True
         else:
+            print(self.top4)
+            print(self.speed)
             weakest_in_top4 = min(self.top4, key=lambda c: self.speed[c])
             if self.speed[cid] > self.speed[weakest_in_top4]:
                 self.top4.remove(weakest_in_top4)
@@ -78,7 +82,6 @@ class TitForTat:
         """
         while True:
             time.sleep(30)
-            print(self.top4)
             if self.weak is None:
                 continue
             weakest_in_top4 = min(self.top4, key=lambda c: self.speed[c])
