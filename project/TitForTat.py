@@ -13,8 +13,8 @@ class TitForTat:
         self.top4 = []
         self.weak = None
         self.operating = []
-        threading.Thread(target=self._updateWeak).start()
-        threading.Thread(target=self._monitoring_thread).start()
+        threading.Thread(target=self._updateWeak,daemon=True).start()
+        threading.Thread(target=self._monitoring_thread,daemon=True).start()
 
     def monitoring(self, packet):
         """

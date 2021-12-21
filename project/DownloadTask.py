@@ -21,8 +21,8 @@ class DownloadTask:
         self.titfortat = TitForTat()
         self.fileStorage = fileStorage
         self.selfPort = selfPort
-        threading.Thread(target=self.run).start()
-        threading.Thread(target=self._autoAsk).start()
+        threading.Thread(target=self.run,daemon=True).start()
+        threading.Thread(target=self._autoAsk,daemon=True).start()
 
     def close(self):
         self.closed = True
