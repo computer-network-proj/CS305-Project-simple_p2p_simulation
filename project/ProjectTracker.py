@@ -21,7 +21,7 @@ class ProjectTracker(Tracker):
             packet = TrackerReqPacket.fromBytes(packet)
             type = packet.op
             info = packet.fid
-            print(type,info)
+            print(type, info)
             self.SWITCH.get(type, self.default)(info, identification)
         # TODO our code
 
@@ -77,9 +77,9 @@ class ProjectTracker(Tracker):
         receivers = self.information.get(fid)
         # receivers = list(receivers)
 
-        packet = TrackerRespPacket(fid,receivers)
+        packet = TrackerRespPacket(fid, receivers)
         packet = packet.toBytes()
-
+        print(receivers)
         for item in receivers:
             self.__send__(packet, item)
 

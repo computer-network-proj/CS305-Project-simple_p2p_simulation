@@ -5,13 +5,12 @@ from ProjectPClient import ProjectPClient as PClient
 
 tracker_address = ("127.0.0.1", 10086)
 
-
 if __name__ == '__main__':
     # A,B,C,D,E join the network
     A = PClient(tracker_address, upload_rate=2000000, download_rate=500000, port=10091)
-    B = PClient(tracker_address, upload_rate=500000, download_rate= 1000000, port=10092)
+    B = PClient(tracker_address, upload_rate=500000, download_rate=1000000, port=10092)
     C = PClient(tracker_address, upload_rate=1000000, download_rate=500000, port=10093)
-    D = PClient(tracker_address, upload_rate=700000, download_rate=400000,  port=10094)
+    D = PClient(tracker_address, upload_rate=700000, download_rate=400000, port=10094)
     E = PClient(tracker_address, upload_rate=2000000, download_rate=7000000, port=10095)
 
     clients = [B, C, D, E]
@@ -20,9 +19,11 @@ if __name__ == '__main__':
     threads = []
     files = {}
 
+
     # function for download and save
     def download(node, index):
         files[index] = node.download(fid)
+
 
     time_start = time.time_ns()
     for i, client in enumerate(clients):
@@ -43,8 +44,10 @@ if __name__ == '__main__':
     # exit()
     # B, C, D, E has completed the download of file
     threads.clear()
-    F = PClient(tracker_address, upload_rate=50000, download_rate=100000)
-    G = PClient(tracker_address, upload_rate=100000, download_rate=60000)
+    print("-------------------------------")
+
+    F = PClient(tracker_address, upload_rate=500000, download_rate=1000000, port=10096)
+    G = PClient(tracker_address, upload_rate=1000000, download_rate=600000, port=10097)
     # F, G join the network
     clients = [F, G]
     for i, client in enumerate(clients):
@@ -55,14 +58,17 @@ if __name__ == '__main__':
     # A exits
     time.sleep(20)
     A.cancel(fid)
+    print("A cancel")
 
     # B exits
     time.sleep(10)
     B.close()
+    print("B close")
 
     # D exits
     time.sleep(30)
     D.close()
+    print("D close")
     for t in threads:
         t.join()
     for i in files:

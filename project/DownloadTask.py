@@ -41,9 +41,11 @@ class DownloadTask:
             self.fileStorage.display()
             if type == 2:
                 p = TrackerRespPacket.fromBytes(data)
+                for c in self.peers - p.info:
+                    self.fileStorage.cancel(c)
                 print(f'{cid[1]} > {self.selfPort} | {p}\n', end='')
                 self.peers = p.info
-            # get request
+                self.downloadingPeers = self.downloadingPeers & self.peers
             elif type == 3:
                 p = ClientReqPacket.fromBytes(data)
                 print(f'{cid[1]} > {self.selfPort} | {p}\n', end='')
@@ -53,11 +55,12 @@ class DownloadTask:
                     self.titfortat.tryRegister(cid)
                     able = not self.titfortat.isChoking(cid) and self.fileStorage.haveFilePieces[p.index]
                     if able:
+
                         print(f'{self.selfPort} send {cid[1]} {p.index}')
                         self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, p.index, self.fileStorage.filePieces[p.index]).toBytes(), cid)
                     else:
-                        raise RuntimeError()
                         self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, -2, b'').toBytes(), cid)
+
             # get response
             elif type == 4:
                 p = ClientRespPacket.fromBytes(data)
@@ -75,8 +78,18 @@ class DownloadTask:
                         print(f'{cid[1]} promise {self.selfPort} {chosenIndex}\n', end='')
                         self.fileStorage.promise(chosenIndex, cid)
                         self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
+
+                        if self.fileStorage.isInteresting(p.haveFilePieces):
+                            chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces)
+                            if chosenIndex == -1: continue
+                            print(f'{cid[1]} promise {self.selfPort} {chosenIndex}\n', end='')
+                            self.fileStorage.promise(chosenIndex, cid)
+                            self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
+                        else:
+                            if cid in self.downloadingPeers : self.downloadingPeers.remove(cid)
+
                     else:
-                        self.downloadingPeers.remove(cid)
+                        if cid in self.downloadingPeers: self.downloadingPeers.remove(cid)
 
                         # if self.pipe.recv_queue.qsize() > 0: continue
                         # if len(self.fileStorage.promisesMap[cid]) < 999999:
@@ -84,7 +97,6 @@ class DownloadTask:
                         #     if chosenIndex == -1: continue
                         #     self.fileStorage.promise(chosenIndex, cid)
                         #     self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
-
 
     def _autoAsk(self):
         while not self.closed:
@@ -98,7 +110,6 @@ class DownloadTask:
                 randomPeerCid = random.choice(possiblePeers)
                 self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), randomPeerCid)
                 self.downloadingPeers.add(randomPeerCid)
-
 
     def getFile(self):
         """

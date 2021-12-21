@@ -11,6 +11,7 @@ import threading
 BLOCK_SIZE = 32 * 1024  # 现为128KB，可能设置16KB
 
 
+
 # 输入数字，生成 8 位字符串
 def generateFidHead(str):
     return int(str).to_bytes(length=4, byteorder="big")
