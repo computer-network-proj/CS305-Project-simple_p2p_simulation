@@ -23,6 +23,7 @@ class ProjectTracker(Tracker):
             info = packet.fid
             print(type, info)
             self.SWITCH.get(type, self.default)(info, identification)
+            print(self.information)
         # TODO our code
 
     def register(self, fid, clientIdentification):

@@ -18,7 +18,7 @@ class ProjectPClient(PClient):
         self.tasks = {}
         # self.fidMap = {}
 
-        threading.Thread(target=self.recvThread).start()
+        threading.Thread(target=self.recvThread,daemon=True).start()
         # TODO our init code
 
     def recvThread(self):
@@ -41,11 +41,13 @@ class ProjectPClient(PClient):
                 print(self.tasks.keys())
 
     def register(self, file_path: str):
+        self.proxy.active = True
         fileStorage = FileStorage.fromPath(file_path)
         # packet = TrackerPacket.generatePacket(TrackerOperation.REGISTER,byteFid)
         fid = fileStorage.fid
         if fid in self.tasks:
             self.tasks[fid].fileStorage = fileStorage
+            self.tasks[fid].closed = False
         else:
             new_task = DownloadTask(fileStorage, self.__send__, selfPort=self.proxy.port)
             self.tasks[fid] = new_task
@@ -58,6 +60,7 @@ class ProjectPClient(PClient):
         # TODO our code
 
     def download(self, fid) -> bytes:
+        self.proxy.active = True
         # TODO 这里需要上线程锁
         # if task already exists:
 
@@ -92,6 +95,11 @@ class ProjectPClient(PClient):
         self.tasks = {}
         for key in temp.keys():
             temp[key].close()
+
+        while True:
+            if self.proxy.send_queue.empty():
+                self.proxy.active = False
+                break
         # TODO our code
 
 
