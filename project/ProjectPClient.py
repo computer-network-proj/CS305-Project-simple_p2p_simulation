@@ -11,14 +11,14 @@ from Proxy import Proxy
 
 class ProjectPClient(PClient):
 
-    def __init__(self, tracker_addr: (str, int), proxy=None, port=None, upload_rate=0, download_rate=0):
+    def __init__(self, tracker_addr: (str, int), proxy=None, port=None, upload_rate=0, download_rate=0, tit_tat=True):
         super().__init__(tracker_addr, proxy, port, upload_rate, download_rate)
         self.active = True
 
         self.tasks = {}
         # self.fidMap = {}
-
-        threading.Thread(target=self.recvThread,daemon=True).start()
+        self.tit_tat = tit_tat
+        threading.Thread(target=self.recvThread, daemon=True).start()
         # TODO our init code
 
     def recvThread(self):
@@ -49,7 +49,7 @@ class ProjectPClient(PClient):
             self.tasks[fid].fileStorage = fileStorage
             self.tasks[fid].closed = False
         else:
-            new_task = DownloadTask(fileStorage, self.__send__, selfPort=self.proxy.port)
+            new_task = DownloadTask(fileStorage, self.__send__, selfPort=self.proxy.port, tit_tat=self.tit_tat)
             self.tasks[fid] = new_task
 
         packet = TrackerReqPacket.newRegister(fileStorage.fid)
@@ -67,7 +67,7 @@ class ProjectPClient(PClient):
         if fid in self.tasks:
             return self.tasks[fid].get_file()
 
-        new_task = DownloadTask(FileStorage.fromFid(fid), self.__send__, selfPort=self.proxy.port)
+        new_task = DownloadTask(FileStorage.fromFid(fid), self.__send__, selfPort=self.proxy.port, tit_tat=self.tit_tat)
         self.tasks[fid] = new_task
 
         packet = TrackerReqPacket.newDownload(fid)

@@ -12,7 +12,7 @@ import random
 
 
 class DownloadTask:
-    def __init__(self, fileStorage: FileStorage, send_func, selfPort=None):
+    def __init__(self, fileStorage: FileStorage, send_func, selfPort=None, tit_tat=False):
         self.fid = fileStorage.fid
         self.peers = set()
         self.closed = False
@@ -21,6 +21,7 @@ class DownloadTask:
         self.titfortat = TitForTat()
         self.fileStorage = fileStorage
         self.selfPort = selfPort
+        self.tit_tat = tit_tat
         threading.Thread(target=self.run,daemon=True).start()
         threading.Thread(target=self._autoAsk,daemon=True).start()
 
@@ -38,7 +39,7 @@ class DownloadTask:
             data, cid = packet
             type = Packet.getType(data)
             # tracker
-            self.fileStorage.display()
+            # self.fileStorage.display()
             if type == 2:
                 p = TrackerRespPacket.fromBytes(data)
                 for c in self.peers - p.info:
@@ -53,9 +54,11 @@ class DownloadTask:
                     self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, -1, b'').toBytes(), cid)
                 else:
                     self.titfortat.tryRegister(cid)
-                    able = not self.titfortat.isChoking(cid) and self.fileStorage.haveFilePieces[p.index]
+                    if self.tit_tat:
+                        able = not self.titfortat.isChoking(cid) and self.fileStorage.haveFilePieces[p.index]
+                    else:
+                        able = self.fileStorage.haveFilePieces[p.index]
                     if able:
-
                         print(f'{self.selfPort} send {cid[1]} {p.index}')
                         self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, p.index, self.fileStorage.filePieces[p.index]).toBytes(), cid)
                     else:
