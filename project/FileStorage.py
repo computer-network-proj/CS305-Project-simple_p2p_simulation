@@ -41,14 +41,18 @@ class FileStorage:
         self.haveFilePieces = haveFilePieces
         self.promises = promises
         self.fid = fid
-        self.max_timeout = 5
+        self.max_timeout = 999
         self.closed = False
-        self.timeoutThread = threading.Thread(target=self.timeout)
-        self.timeoutThread.start()
+        # self.timeoutThread = threading.Thread(target=self.timeout)
+        # self.timeoutThread.start()
         self.promisesMap = {}
 
     def close(self):
         self.closed = True
+
+    def dying(self):
+        for i in range(len(self.promises)):
+            self.promises[i] = self.promises[i] - 1 if self.promises[i] > 0 else 0
 
     def timeout(self):
         while not self.closed:

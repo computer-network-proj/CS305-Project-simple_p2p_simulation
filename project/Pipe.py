@@ -20,4 +20,4 @@ class Pipe:
             if not self.recv_queue.empty():
                 return self.recv_queue.get_nowait()
             else:
-                time.sleep(0.0001)
+                time.sleep(0.0000001)

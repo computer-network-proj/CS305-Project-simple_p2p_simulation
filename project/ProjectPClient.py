@@ -47,7 +47,7 @@ class ProjectPClient(PClient):
         if fid in self.tasks:
             self.tasks[fid].fileStorage = fileStorage
         else:
-            new_task = DownloadTask(fileStorage, self.__send__, selfPort=self.proxy.port)
+            new_task = DownloadTask(fileStorage, self.__send__, selfPort=self.proxy.port, client=self)
             self.tasks[fid] = new_task
 
         packet = TrackerReqPacket.newRegister(fileStorage.fid)
@@ -64,7 +64,7 @@ class ProjectPClient(PClient):
         if fid in self.tasks:
             return self.tasks[fid].get_file()
 
-        new_task = DownloadTask(FileStorage.fromFid(fid), self.__send__, selfPort=self.proxy.port)
+        new_task = DownloadTask(FileStorage.fromFid(fid), self.__send__, selfPort=self.proxy.port, client=self)
         self.tasks[fid] = new_task
 
         packet = TrackerReqPacket.newDownload(fid)
