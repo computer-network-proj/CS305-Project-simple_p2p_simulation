@@ -6,7 +6,7 @@ from PClient import PClient
 from DownloadTask import DownloadTask
 from FileStorage import FileStorage
 import threading
-import  multiprocessing
+import multiprocessing
 from multiprocessing import SimpleQueue
 
 from Proxy import Proxy
@@ -14,7 +14,7 @@ from Proxy import Proxy
 
 class ProjectPClient(PClient):
 
-    def __init__(self, tracker_addr: (str, int), proxy=None, port=None, upload_rate=0, download_rate=0):
+    def __init__(self, tracker_addr: (str, int), proxy=None, port=None, upload_rate=0, download_rate=0, tit_tat=False):
         super().__init__(tracker_addr, proxy, port, upload_rate, download_rate)
         self.active = True
         self.sub_process_send_queue = SimpleQueue()
@@ -23,10 +23,13 @@ class ProjectPClient(PClient):
         # self.tasks = {}
         self.file_map = {}
         self.lock = threading.Lock()
+        self.tit_tat = tit_tat
 
         threading.Thread(target=self.recvThread,daemon=True).start()
         threading.Thread(target=self.sendThread,daemon=True).start()
+
         # TODO our init code
+
     def sendThread(self):
         while self.active:
             # self.lock.acquire()
@@ -38,6 +41,7 @@ class ProjectPClient(PClient):
             else:
                 self.__send__(pkt[0],pkt[1])
             # self.lock.release()
+
             time.sleep(0.0001)
 
     def recvThread(self):
@@ -62,22 +66,25 @@ class ProjectPClient(PClient):
                 print(self.sub_process_recv_queue_dic.keys())
             # self.lock.release()
 
-
     def register(self, file_path: str):
         self.proxy.active = True
+
         # self.lock.acquire()
+
         fileStorage = FileStorage.fromPath(file_path)
         # packet = TrackerPacket.generatePacket(TrackerOperation.REGISTER,byteFid)
         fid = fileStorage.fid
         recv_queue = SimpleQueue()
 
         if fid in self.sub_process_recv_queue_dic:
-            #TODO
+            # TODO
             pass
             # self.tasks[fid].fileStorage = fileStorage
         else:
             self.sub_process_recv_queue_dic[fid] = recv_queue
-            p = DownloadTask(fileStorage,recv_queue,self.sub_process_send_queue,self.proxy.port)
+
+            p = DownloadTask(fileStorage, recv_queue, self.sub_process_send_queue, self.proxy.port,
+                             tit_tat=self.tit_tat)
             p.daemon = False
             self.process[fid] = p
             p.start()
@@ -87,27 +94,29 @@ class ProjectPClient(PClient):
             self.__send__(packet, self.tracker)
         # self.lock.release()
 
-
         return fid
 
         # TODO our code
 
     def download(self, fid) -> bytes:
+        self.proxy.active = True
         # TODO 这里需要上线程锁
         # if task already exists:
+
         self.proxy.active = True
+
         recv_queue = SimpleQueue()
         self.lock.acquire()
         if fid in self.sub_process_recv_queue_dic:
             pass
-            #TODO
+            # TODO
         else:
             self.sub_process_recv_queue_dic[fid] = recv_queue
-            p = DownloadTask(FileStorage.fromFid(fid),recv_queue,self.sub_process_send_queue,self.proxy.port)
+            p = DownloadTask(FileStorage.fromFid(fid), recv_queue, self.sub_process_send_queue, self.proxy.port,
+                             tit_tat=self.tit_tat)
             self.process[fid] = p
             p.daemon = False
             p.start()
-
 
             packet = TrackerReqPacket.newDownload(fid)
             packet = packet.toBytes()
@@ -138,9 +147,10 @@ class ProjectPClient(PClient):
         self.__send__(packet, self.tracker)
 
         temp = self.process
-        self.process= {}
+        self.process = {}
         for key in temp.keys():
             temp[key].terminate()
+
 
         self.sub_process_recv_queue_dic ={}
         # self.lock.release()

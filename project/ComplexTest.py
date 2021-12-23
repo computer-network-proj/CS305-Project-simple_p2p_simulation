@@ -19,9 +19,11 @@ if __name__ == '__main__':
     threads = []
     files = {}
 
+
     # function for download and save
     def download(node, index):
         files[index] = node.download(fid)
+
 
     time_start = time.time_ns()
     for i, client in enumerate(clients):

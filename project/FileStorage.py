@@ -11,7 +11,6 @@ import threading
 BLOCK_SIZE = 32 * 1024  # 现为128KB，可能设置16KB
 
 
-
 # 输入数字，生成 8 位字符串
 def generateFidHead(str):
     return int(str).to_bytes(length=4, byteorder="big")
@@ -60,7 +59,6 @@ class FileStorage:
             for i in range(len(self.promises)):
                 self.promises[i] = self.promises[i] - 1 if self.promises[i] > 0 else 0
 
-
     @staticmethod
     def generateFid(data: bytes):
         """
@@ -95,7 +93,7 @@ class FileStorage:
             promises.append(0)
 
         data_hash = FileStorage.generateFid(data)
-        header =generateFidHead(block_num)
+        header = generateFidHead(block_num)
         fid = header + data_hash.encode()
 
         fileStorage = FileStorage(filePieces=file_pieces, haveFilePieces=have_file_pieces, fid=fid, promises=promises)
@@ -169,7 +167,6 @@ class FileStorage:
             for index in popSet:
                 self.promises[index] = 0
 
-
     def promise(self, index, cid):
         """
         一个client对象许诺为我提供一个文件片
@@ -177,7 +174,7 @@ class FileStorage:
         :param cid: client对象的id
         """
         if cid not in self.promisesMap.keys():
-            self.promisesMap[cid] =set()
+            self.promisesMap[cid] = set()
             self.promisesMap[cid].add(index)
         else:
             self.promisesMap[cid].add(index)
@@ -189,7 +186,7 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: boolean值
         """
-        have_temp = [ self.haveFilePieces[i] or self.promises[i] > 0 for i in range(len(self.haveFilePieces))]
+        have_temp = [self.haveFilePieces[i] or self.promises[i] > 0 for i in range(len(self.haveFilePieces))]
         blockNum = int.from_bytes(self.fid[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if have_temp[i] is True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] is True])
@@ -215,13 +212,12 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: 文件片段index。如果找不到，返回-1
         """
-        #FIXME promise
-        #BUG
+        # FIXME promise
+        # BUG
         blockNum = int.from_bytes(self.fid[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
         myPromises = set([i for i in range(blockNum) if self.promises[i] > 0])
-
 
         difference = partnerPieces - myPieces
         difference = difference - myPromises

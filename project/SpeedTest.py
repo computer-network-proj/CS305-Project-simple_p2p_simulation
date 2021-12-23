@@ -14,6 +14,7 @@ def client_download(client):
 
 if __name__ == '__main__':
     # A, B, C, D, E join the network
+
     # A = PClient(tracker_address, upload_rate=100000, download_rate=100000)
     # B = PClient(tracker_address, upload_rate=100000, download_rate=100000)
     # C = PClient(tracker_address, upload_rate=100000, download_rate=100000)
@@ -25,14 +26,17 @@ if __name__ == '__main__':
     C = PClient(tracker_address, upload_rate=100000, download_rate=100000,port=40003)
     D = PClient(tracker_address, upload_rate=100000, download_rate=100000,port=40004)
     E = PClient(tracker_address, upload_rate=100000, download_rate=100000,port=40005)
+
     fid = A.register("../test_files/bg.png")
     files = {}
     clients = [B, C, D, E]
     threads = []
 
+
     # function for download and save
     def download(node, index):
         files[index] = node.download(fid)
+
 
     for i, client in enumerate(clients):
         threads.append(Thread(target=download, args=(clients[i], i)))

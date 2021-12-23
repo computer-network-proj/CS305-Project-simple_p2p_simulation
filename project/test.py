@@ -15,4 +15,7 @@
 
 
 if __name__ == '__main__':
-    print(bool([]))
+    l = []
+    l.append(1)
+    l.append(1)
+    print(l)
