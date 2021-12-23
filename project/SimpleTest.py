@@ -11,6 +11,7 @@ if __name__ == '__main__':
     # A register a file and B download it
     fid = A.register("../test_files/alice.txt")
     data1 = B.download(fid)
+    print("11111")
     # print(data1)
 
     # A cancel the register of the file
@@ -27,3 +28,4 @@ if __name__ == '__main__':
 
     B.close()
     C.close()
+    print("ending")

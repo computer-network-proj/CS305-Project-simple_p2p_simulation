@@ -14,11 +14,19 @@ def client_download(client):
 
 if __name__ == '__main__':
     # A, B, C, D, E join the network
-    A = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=50001)
-    B = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=50002)
-    C = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=50003)
-    D = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=50004)
-    E = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=50005)
+
+    # A = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+    # B = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+    # C = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+    # D = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+    # E = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+
+    A = PClient(tracker_address, upload_rate=100000, download_rate=100000,port=40001)
+    B = PClient(tracker_address, upload_rate=100000, download_rate=100000,port=40002)
+    C = PClient(tracker_address, upload_rate=100000, download_rate=100000,port=40003)
+    D = PClient(tracker_address, upload_rate=100000, download_rate=100000,port=40004)
+    E = PClient(tracker_address, upload_rate=100000, download_rate=100000,port=40005)
+
     fid = A.register("../test_files/bg.png")
     files = {}
     clients = [B, C, D, E]

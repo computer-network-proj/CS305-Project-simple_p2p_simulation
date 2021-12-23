@@ -31,6 +31,7 @@ if __name__ == '__main__':
     M = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40013)
 
     fid = A.register("../test_files/bg.png")
+
     # K.register("../test_files/big_alice.txt")
     files = {}
     clients = [B, C, D, E, F, G, H, I, J, L, M]
@@ -51,7 +52,9 @@ if __name__ == '__main__':
     for t in threads:
         t.join()
     print(f"Time of P2P model: {(time.time_ns() - time_start) * 1e-9}")
+
     with open("../test_files/bg.png", "rb") as bg:
+
         bs = bg.read()
         for i in files:
             if files[i] != bs:
@@ -62,4 +65,4 @@ if __name__ == '__main__':
     for c in clients:
         c.close()
 
-    print("End")
+    print("Ending")

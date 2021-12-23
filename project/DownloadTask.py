@@ -33,9 +33,11 @@ class DownloadTask(Process):
         if self.tit_tat:
             self.titfortat = TitForTat(self.selfPort)
             print("Outer" + str(self.selfPort) + str(self.titfortat))
+
         threading.Thread(target=self.run_sub).start()
         threading.Thread(target=self._autoAsk).start()
         threading.Thread(target=self.getFile).start()
+
 
     def run_sub(self):
         """
