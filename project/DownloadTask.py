@@ -1,48 +1,54 @@
 from Pipe import Pipe
-from TitForTat import TitForTat
+# from TitForTat import TitForTat
 from Packet import ClientReqPacket, Packet, ClientRespPacket, TrackerRespPacket
 import threading
 from FileStorage import FileStorage
 import time
 import random
 import PClient
-
+import multiprocessing
+from multiprocessing import Process
 '''
 职能：client对特定文件的维护类
 '''
 
 
-class DownloadTask:
-    def __init__(self, fileStorage: FileStorage, send_func, selfPort=None, client=None):
-        self.client = client
+class DownloadTask(Process):
+    def __init__(self, fileStorage: FileStorage, rec_queue,send_queue, selfPort=None):
+        Process.__init__(self)
         self.fid = fileStorage.fid
         self.peers = set()
         self.closed = False
         self.downloadingPeers = set()
-        self.pipe = Pipe(send_func)
-        self.titfortat = TitForTat()
+        self.pipe = Pipe(rec_queue,send_queue)
+        # self.titfortat = TitForTat()
         self.fileStorage = fileStorage
         self.selfPort = selfPort
-        threading.Thread(target=self.run).start()
+
+
+    def run(self):
+
+        threading.Thread(target=self.run_sub).start()
         threading.Thread(target=self._autoAsk).start()
+        threading.Thread(target=self.getFile).start()
 
     def close(self):
         self.closed = True
 
-    def run(self):
+    def run_sub(self):
         """
         实现recv的核心线程
         :return:
         """
         while not self.closed:
             packet = self.pipe.recv()
-            print(self.client.proxy.recv_queue.qsize())
+            # print(self.pipe.recv_queue.qsize())
             # threading.Thread(target=self.opPacket, args=[packet]).start()
             self.opPacket(packet)
 
     def opPacket(self, packet):
         all = time.time()
-        self.titfortat.monitoring(packet)
+        # self.titfortat.monitoring(packet)
         data, cid = packet
         type = Packet.getType(data)
         # tracker
@@ -61,8 +67,8 @@ class DownloadTask:
             if p.index == -1:
                 self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, -1, b'').toBytes(), cid)
             else:
-                self.titfortat.tryRegister(cid)
-                able = not self.titfortat.isChoking(cid) and self.fileStorage.haveFilePieces[p.index]
+                # self.titfortat.tryRegister(cid)
+                able = self.fileStorage.haveFilePieces[p.index]
                 if able:
 
                     print(f'{self.selfPort} send {cid[1]} {p.index}')
@@ -70,7 +76,7 @@ class DownloadTask:
                                                     self.fileStorage.filePieces[p.index]).toBytes(), cid)
                 else:
                     self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, -2, b'').toBytes(), cid)
-            print(f"??3-{time.time() - start}")
+            # print(f"??3-{time.time() - start}")
 
 
         # get response
@@ -108,8 +114,8 @@ class DownloadTask:
                 else:
                     if cid in self.downloadingPeers: self.downloadingPeers.remove(cid)
 
-            print(f"??4-{time.time() - start}")
-        print(f'??A{time.time() - all}')
+            # print(f"??4-{time.time() - start}")
+        # print(f'??A{time.time() - all}')
 
             # if self.pipe.recv_queue.qsize() > 0: continue
                     # if len(self.fileStorage.promisesMap[cid]) < 999999:
@@ -138,6 +144,6 @@ class DownloadTask:
         :return:
         """
         while not self.closed:
-            time.sleep(0.01)
+            time.sleep(1)
             if self.fileStorage.isComplete():
-                return self.fileStorage.getFile()
+                self.pipe.send(self.fileStorage.getFile(), ('OUT_FILE', self.fid))
