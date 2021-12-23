@@ -156,6 +156,8 @@ class FileStorage:
         self.filePieces[index] = data
         self.haveFilePieces[index] = True
         self.promises[index] = 0
+        for peer in self.promisesMap.keys():
+            self.promisesMap[peer].discard(index)
 
     def cancel(self, cid):
         """

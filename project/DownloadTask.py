@@ -91,6 +91,8 @@ class DownloadTask(Process):
                 if p.index == -1:
                     if cid in self.fileStorage.promisesMap.keys() and len(self.fileStorage.promisesMap[cid]) > 0:
                         self.fileStorage.cancel(cid)
+                    if cid in self.fileStorage.promisesMap.keys() and len(self.fileStorage.promisesMap[cid]) > 2:
+                        return
                 if p.index != -1:
                     if self.fileStorage.haveFilePieces[p.index]: return
                     self.fileStorage.add(p.index, p.data)
@@ -100,16 +102,6 @@ class DownloadTask(Process):
                     print(f'{cid[1]} promise {self.selfPort} {chosenIndex}\n', end='')
                     self.fileStorage.promise(chosenIndex, cid)
                     self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
-
-                    if p.index > -100:
-                        if self.fileStorage.isInteresting(p.haveFilePieces):
-                            chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces)
-                            if chosenIndex == -1: return
-                            print(f'{cid[1]} promise {self.selfPort} {chosenIndex}\n', end='')
-                            self.fileStorage.promise(chosenIndex, cid)
-                            self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
-                        else:
-                            if cid in self.downloadingPeers : self.downloadingPeers.remove(cid)
 
                 else:
                     if cid in self.downloadingPeers: self.downloadingPeers.remove(cid)
@@ -128,15 +120,22 @@ class DownloadTask(Process):
         while not self.closed:
             if self.fileStorage.isComplete():
                 return
-            time.sleep(0.5)
             # possiblePeers = list(self.peers - self.downloadingPeers - {('127.0.0.1', self.selfPort)})
             possiblePeers = list(self.peers - {('127.0.0.1', self.selfPort)})
             # print(str(self.selfPort) + " " + str(possiblePeers))
 
-            if possiblePeers:
-                randomPeerCid = random.choice(possiblePeers)
-                self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), randomPeerCid)
-                self.downloadingPeers.add(randomPeerCid)
+            for peer in possiblePeers:
+                self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), peer)
+                time.sleep(1)
+            time.sleep(0.1)
+
+            # if possiblePeers:
+            #     randomPeerCid = random.choice(possiblePeers)
+            #     self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), randomPeerCid)
+            #     self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), randomPeerCid)
+            #     self.downloadingPeers.add(randomPeerCid)
+            #     time.sleep(5)
+            # time.sleep(1)
 
     def getFile(self):
         """
