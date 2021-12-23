@@ -27,10 +27,10 @@ class DownloadTask(Process):
 
 
     def run(self):
-
         threading.Thread(target=self.run_sub).start()
         threading.Thread(target=self._autoAsk).start()
         threading.Thread(target=self.getFile).start()
+
 
     def close(self):
         self.closed = True
