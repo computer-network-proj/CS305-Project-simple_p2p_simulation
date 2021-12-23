@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import time
 
 
 class Packet:
@@ -44,7 +45,7 @@ class TrackerReqPacket(Packet):
 
     @staticmethod
     def newClose():
-        return TrackerReqPacket(4, b"0"*36)
+        return TrackerReqPacket(4, b"0" * 36)
 
     @staticmethod
     def fromBytes(data):

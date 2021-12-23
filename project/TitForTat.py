@@ -8,13 +8,14 @@ import Packet
 
 
 class TitForTat:
-    def __init__(self):
+    def __init__(self, port):
         self.speed = {}
         self.top4 = []
         self.weak = None
+        self.port = port
         self.operating = []
-        threading.Thread(target=self._updateWeak,daemon=True).start()
-        threading.Thread(target=self._monitoring_thread,daemon=True).start()
+        threading.Thread(target=self._updateWeak, daemon=True).start()
+        threading.Thread(target=self._monitoring_thread, daemon=True).start()
 
     def monitoring(self, packet):
         """
@@ -32,9 +33,9 @@ class TitForTat:
         使用滑动平均计算每秒收到包数
         :return:
         """
-        decay = 0
+        decay = 0.5
         while True:
-            time.sleep(1)
+            time.sleep(5)
             for cid in self.speed:
                 self.speed[cid] = 0 if self.speed[cid] < 0.001 else self.speed[cid] * decay
             for o in self.operating:
@@ -42,6 +43,8 @@ class TitForTat:
                     self.speed[o] = 0
             for o in self.operating:
                 self.speed[o] += 1 - decay
+            print(f"Length{self.operating}")
+            print(f"Speed{self.speed}")
             self.operating.clear()
 
     def tryRegister(self, cid):

@@ -5,12 +5,13 @@ tracker_address = ("127.0.0.1", 10086)
 
 if __name__ == '__main__':
     # A,B join the network
-    A = PClient(tracker_address, upload_rate=2*1024*1024*1024, download_rate=2*1024*1024*1024)
-    B = PClient(tracker_address, upload_rate=2*1024*1024*1024, download_rate=2*1024*1024*1024)
+    A = PClient(tracker_address)
+    B = PClient(tracker_address)
 
     # A register a file and B download it
-    fid = A.register("../test_files/bg.png")
+    fid = A.register("../test_files/alice.txt")
     data1 = B.download(fid)
+    # print(data1)
 
     # A cancel the register of the file
     A.close()

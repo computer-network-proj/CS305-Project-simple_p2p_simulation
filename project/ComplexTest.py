@@ -7,11 +7,11 @@ tracker_address = ("127.0.0.1", 10086)
 
 if __name__ == '__main__':
     # A,B,C,D,E join the network
-    A = PClient(tracker_address, upload_rate=2000000, download_rate=500000, port=10091)
-    B = PClient(tracker_address, upload_rate=500000, download_rate=1000000, port=10092)
-    C = PClient(tracker_address, upload_rate=1000000, download_rate=500000, port=10093)
-    D = PClient(tracker_address, upload_rate=700000, download_rate=400000, port=10094)
-    E = PClient(tracker_address, upload_rate=2000000, download_rate=7000000, port=10095)
+    A = PClient(tracker_address, upload_rate=200000, download_rate=50000)
+    B = PClient(tracker_address, upload_rate=50000, download_rate=100000)
+    C = PClient(tracker_address, upload_rate=100000, download_rate=50000)
+    D = PClient(tracker_address, upload_rate=70000, download_rate=40000)
+    E = PClient(tracker_address, upload_rate=200000, download_rate=700000)
 
     clients = [B, C, D, E]
     # A register a file and B download it
@@ -41,13 +41,10 @@ if __name__ == '__main__':
             if files[i] != bs:
                 raise Exception("Downloaded file is different with the original one")
 
-    # exit()
     # B, C, D, E has completed the download of file
     threads.clear()
-    print("-------------------------------")
-
-    F = PClient(tracker_address, upload_rate=500000, download_rate=1000000, port=10096)
-    G = PClient(tracker_address, upload_rate=1000000, download_rate=600000, port=10097)
+    F = PClient(tracker_address, upload_rate=50000, download_rate=100000)
+    G = PClient(tracker_address, upload_rate=100000, download_rate=60000)
     # F, G join the network
     clients = [F, G]
     for i, client in enumerate(clients):
@@ -58,17 +55,14 @@ if __name__ == '__main__':
     # A exits
     time.sleep(20)
     A.cancel(fid)
-    print("A cancel")
 
     # B exits
     time.sleep(10)
     B.close()
-    print("B close")
 
     # D exits
     time.sleep(30)
     D.close()
-    print("D close")
     for t in threads:
         t.join()
     for i in files:

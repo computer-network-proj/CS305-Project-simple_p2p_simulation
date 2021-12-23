@@ -6,7 +6,7 @@ import operator
 import os
 import random
 import time
-
+import threading
 
 BLOCK_SIZE = 32 * 1024  # 现为128KB，可能设置16KB
 
@@ -40,7 +40,24 @@ class FileStorage:
         self.haveFilePieces = haveFilePieces
         self.promises = promises
         self.fid = fid
+        self.max_timeout = 999
+        self.closed = False
+        # self.timeoutThread = threading.Thread(target=self.timeout)
+        # self.timeoutThread.start()
         self.promisesMap = {}
+
+    def close(self):
+        self.closed = True
+
+    def dying(self):
+        for i in range(len(self.promises)):
+            self.promises[i] = self.promises[i] - 1 if self.promises[i] > 0 else 0
+
+    def timeout(self):
+        while not self.closed:
+            time.sleep(1)
+            for i in range(len(self.promises)):
+                self.promises[i] = self.promises[i] - 1 if self.promises[i] > 0 else 0
 
     @staticmethod
     def generateFid(data: bytes):
@@ -73,10 +90,10 @@ class FileStorage:
         for item in range(block_num):
             file_pieces.append(data[item * BLOCK_SIZE:(item + 1) * BLOCK_SIZE])
             have_file_pieces.append(True)
-            promises.append(False)
+            promises.append(0)
 
         data_hash = FileStorage.generateFid(data)
-        header =generateFidHead(block_num)
+        header = generateFidHead(block_num)
         fid = header + data_hash.encode()
 
         fileStorage = FileStorage(filePieces=file_pieces, haveFilePieces=have_file_pieces, fid=fid, promises=promises)
@@ -98,7 +115,7 @@ class FileStorage:
         for i in range(block_num):
             filePieces.append(b"")  # None
             haveFilePieces.append(False)
-            promises.append(False)
+            promises.append(0)
 
         # fid = fid.decode()
         fileStorage = FileStorage(filePieces=filePieces, haveFilePieces=haveFilePieces, promises=promises, fid=fid)
@@ -136,7 +153,9 @@ class FileStorage:
         """
         self.filePieces[index] = data
         self.haveFilePieces[index] = True
-        self.promises[index] = False
+        self.promises[index] = 0
+        for peer in self.promisesMap.keys():
+            self.promisesMap[peer].discard(index)
 
     def cancel(self, cid):
         """
@@ -146,8 +165,7 @@ class FileStorage:
         if cid in self.promisesMap.keys():
             popSet = self.promisesMap.pop(cid)
             for index in popSet:
-                self.promises[index] = False
-
+                self.promises[index] = 0
 
     def promise(self, index, cid):
         """
@@ -156,11 +174,11 @@ class FileStorage:
         :param cid: client对象的id
         """
         if cid not in self.promisesMap.keys():
-            self.promisesMap[cid] =set()
+            self.promisesMap[cid] = set()
             self.promisesMap[cid].add(index)
         else:
             self.promisesMap[cid].add(index)
-        self.promises[index] = True
+        self.promises[index] = self.max_timeout
 
     def isInteresting(self, haveFilePiecesOffered):
         """
@@ -168,7 +186,7 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: boolean值
         """
-        have_temp = [ self.haveFilePieces[i] or self.promises[i] for i in range(len(self.haveFilePieces))]
+        have_temp = [self.haveFilePieces[i] or self.promises[i] > 0 for i in range(len(self.haveFilePieces))]
         blockNum = int.from_bytes(self.fid[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if have_temp[i] is True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] is True])
@@ -194,13 +212,12 @@ class FileStorage:
         :param haveFilePiecesOffered: 对方的haveFilePieces数组
         :return: 文件片段index。如果找不到，返回-1
         """
-        #FIXME promise
-        #BUG
+        # FIXME promise
+        # BUG
         blockNum = int.from_bytes(self.fid[:4], byteorder="big")
         myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
         partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
-        myPromises = set([i for i in range(blockNum) if self.promises[i] == True])
-
+        myPromises = set([i for i in range(blockNum) if self.promises[i] > 0])
 
         difference = partnerPieces - myPieces
         difference = difference - myPromises
@@ -216,7 +233,7 @@ class FileStorage:
             if i % 10 == 0: string += ' '
             if self.haveFilePieces[i]:
                 string += '#'
-            elif self.promises[i]:
+            elif self.promises[i] > 0:
                 string += '+'
             else:
                 string += '-'
