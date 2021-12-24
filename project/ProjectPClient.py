@@ -97,10 +97,9 @@ class ProjectPClient(PClient):
         self.proxy.active = True
         recv_queue = SimpleQueue()
         self.lock.acquire()
-
-        # if task already exists:
-        if fid in self.sub_process_recv_queue_dic:
+        if fid not in self.sub_process_recv_queue_dic:
             pass
+        # if task didn't exist:
         else:
             self.sub_process_recv_queue_dic[fid] = recv_queue
             p = DownloadTask(FileStorage.fromFid(fid), recv_queue, self.sub_process_send_queue, self.proxy.port,
