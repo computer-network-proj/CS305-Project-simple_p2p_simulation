@@ -225,8 +225,8 @@ class FileStorage:
         else:
             return random.sample(difference, 1)[0]
 
-    def display(self):
-        string = ''
+    def __str__(self):
+        string = str(round(sum(self.haveFilePieces) / len(self.haveFilePieces)* 100, 1)) + '%\t'
         for i in range(len(self.haveFilePieces)):
             if i % 10 == 0: string += ' '
             if self.haveFilePieces[i]:
@@ -235,7 +235,13 @@ class FileStorage:
                 string += '+'
             else:
                 string += '-'
-        print(string)
+            if i > 100:
+                string += ' ...'
+                break
+        return string
+
+    def display(self):
+        print(self.__str__(), end='')
 
 
 if __name__ == '__main__':

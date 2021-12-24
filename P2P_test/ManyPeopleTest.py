@@ -30,7 +30,7 @@ if __name__ == '__main__':
     L = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40012)
     M = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40013)
 
-    fid = A.register("../test_files/bg.png")
+    fid = A.register("../test_files/largest_alice.txt")
 
     # K.register("../test_files/big_alice.txt")
     files = {}
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         t.join()
     print(f"Time of P2P model: {(time.time_ns() - time_start) * 1e-9}")
 
-    with open("../test_files/bg.png", "rb") as bg:
+    with open("../test_files/largest_alice.txt", "rb") as bg:
 
         bs = bg.read()
         for i in files:

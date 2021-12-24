@@ -109,5 +109,5 @@ class Tracker:
         raise NotImplementedError()
 
 if __name__ == '__main__':
-    tracker = Tracker(port=10086)
+    tracker = Tracker(port=10086, upload_rate=1000)
     tracker.start()

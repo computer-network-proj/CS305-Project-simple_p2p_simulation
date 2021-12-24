@@ -53,7 +53,7 @@ class DownloadTask(Process):
         data, cid = packet
         type = Packet.getType(data)
         # tracker
-        # self.fileStorage.display()
+        print(f'{self.selfPort}\t{self.fileStorage}\n', end='')
         if type == 2:
             p = TrackerRespPacket.fromBytes(data)
             for c in self.peers - p.info:
@@ -120,17 +120,20 @@ class DownloadTask(Process):
 
     def _autoAsk(self):
         while not self.closed:
+            num = sum(self.fileStorage.promises)
+            have_temp = [self.fileStorage.haveFilePieces[i] or self.fileStorage.promises[i] > 0 for i in range(len(self.fileStorage.haveFilePieces))]
+            percent = sum(have_temp) / len(self.fileStorage.haveFilePieces)
+            rest = len(have_temp) - sum(have_temp)
             # print(f"{self.selfPort} autoAsk {self.fileStorage.isComplete()}")
             if self.fileStorage.isComplete():
                 return
-            # possiblePeers = list(self.peers - self.downloadingPeers - {('127.0.0.1', self.selfPort)})
             possiblePeers = list(self.peers - {('127.0.0.1', self.selfPort)})
-            # print(str(self.selfPort) + " " + str(possiblePeers))
-            # print(f"{self.selfPort} peers {possiblePeers}")
-            # print(f'{self.pipe.send_queue}')
             for peer in possiblePeers:
                 self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), peer)
-                time.sleep(1)
+                if num < 2 and rest > 2:
+                    time.sleep(0.1)
+                else:
+                    time.sleep(1)
             time.sleep(0.1)
 
             # if possiblePeers:
