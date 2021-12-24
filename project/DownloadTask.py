@@ -13,14 +13,14 @@ from multiprocessing import Process
 
 
 class DownloadTask(Process):
-    def __init__(self, fileStorage: FileStorage, rec_queue, send_queue, selfPort=None, tit_tat=False):
+    def __init__(self, fileStorage: FileStorage, rec_queue, send_queue,file_queue, selfPort=None, tit_tat=False):
         Process.__init__(self)
 
         self.fid = fileStorage.fid
         self.peers = set()
         self.closed = False
         self.downloadingPeers = set()
-        self.pipe = Pipe(rec_queue, send_queue)
+        self.pipe = Pipe(rec_queue, send_queue,file_queue)
         self.fileStorage = fileStorage
         self.selfPort = selfPort
         self.tit_tat = tit_tat
@@ -69,8 +69,11 @@ class DownloadTask(Process):
                 if self.tit_tat:
                     self.titfortat.tryRegister(cid)
                     able = self.fileStorage.haveFilePieces[p.index] and not self.titfortat.isChoking(cid)
-                    # if self.titfortat.isChoking(cid):
-                        # print(f"{self.selfPort} Chocking {cid[1]}")
+                    if self.titfortat.isChoking(cid):
+                        # print(f"{self.selfPort} receiving speed: {self.titfortat.speed}\n")
+                        print(self.titfortat.get_speed_of_top4() +
+                              f"{self.selfPort} is choking {cid[1]}: {round(self.titfortat.speed[cid], 3)}\n",
+                              end="")
                 else:
                     able = self.fileStorage.haveFilePieces[p.index]
                 if able:
@@ -128,7 +131,9 @@ class DownloadTask(Process):
             possiblePeers = list(self.peers - {('127.0.0.1', self.selfPort)})
             for peer in possiblePeers:
                 self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), peer)
-                if num < 2:
+
+                if num < 2 and rest > 10 and percent < 0.5:
+
                     time.sleep(0.1)
                 else:
                     time.sleep(1)
@@ -148,6 +153,7 @@ class DownloadTask(Process):
         :return:
         """
         while not self.closed:
-            time.sleep(1)
+            time.sleep(2)
             if self.fileStorage.isComplete():
-                self.pipe.send(self.fileStorage.getFile(), ('OUT_FILE', self.fid))
+                self.pipe.send_file(self.fileStorage.getFile(), ('OUT_FILE', self.fid))
+                break

@@ -18,6 +18,7 @@ class PClient:
         """
         self.active = True
         self.sub_process_send_queue = SimpleQueue()
+        self.file_queue = SimpleQueue()
         self.sub_process_recv_queue_dic = {}
         self.process = {}
         self.file_map = {}
@@ -26,18 +27,28 @@ class PClient:
 
         threading.Thread(target=self.recvThread,daemon=True).start()
         threading.Thread(target=self.sendThread,daemon=True).start()
+        threading.Thread(target=self.fileThread,daemon=True).start()
+
+    def fileThread(self):
+        while self.active:
+            if self.file_queue.empty():
+                time.sleep(1)
+            else:
+                pkt = self.file_queue.get()
+                self.file_map[pkt[1][1]] = pkt[0]
+
 
     def sendThread(self):
         while self.active:
             pkt = self.sub_process_send_queue.get()
-            if pkt[1][0] == "OUT_FILE":
+            # if pkt[1][0] == "OUT_FILE":
+            #
+            #     self.file_map[pkt[1][1]] = pkt[0]
+            #
+            # else:
+            self.__send__(pkt[0],pkt[1])
 
-                self.file_map[pkt[1][1]] = pkt[0]
-
-            else:
-                self.__send__(pkt[0],pkt[1])
-
-            time.sleep(0.0001)
+            time.sleep(0.00001)
 
     def recvThread(self):
         while self.active:
@@ -101,7 +112,7 @@ class PClient:
         else:
             self.sub_process_recv_queue_dic[fid] = recv_queue
 
-            p = DownloadTask(fileStorage, recv_queue, self.sub_process_send_queue, self.proxy.port,
+            p = DownloadTask(fileStorage, recv_queue, self.sub_process_send_queue,self.file_queue,self.proxy.port,
                              tit_tat=self.tit_tat)
             p.daemon = False
             self.process[fid] = p
@@ -135,7 +146,7 @@ class PClient:
             pass
         else:
             self.sub_process_recv_queue_dic[fid] = recv_queue
-            p = DownloadTask(FileStorage.fromFid(fid), recv_queue, self.sub_process_send_queue, self.proxy.port,
+            p = DownloadTask(FileStorage.fromFid(fid), recv_queue, self.sub_process_send_queue,self.file_queue, self.proxy.port,
                              tit_tat=self.tit_tat)
             self.process[fid] = p
             p.daemon = False
@@ -191,6 +202,7 @@ class PClient:
             if self.proxy.send_queue.qsize()==0:
                 self.proxy.close()
                 break
+            time.sleep(0.0001)
         """
         End of your code
         """
