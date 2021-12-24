@@ -29,12 +29,20 @@ if __name__ == '__main__':
 
     L = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40012)
     M = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40013)
+    N = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40014)
+    O  = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40015)
+    P = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40016)
+    Q = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40017)
+    R = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40018)
+    S = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40019)
+    T = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40020)
+    U = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40021)
 
-    fid = A.register("../test_files/largest_alice.txt")
+    fid = A.register("../test_files/bg.png")
 
     # K.register("../test_files/big_alice.txt")
     files = {}
-    clients = [B, C, D, E, F, G, H, I, J, L, M]
+    clients = [B, C, D, E, F, G, H, I, J,K,L, M,N,O,P,Q,R,S,T,U]
     threads = []
 
 
@@ -53,7 +61,7 @@ if __name__ == '__main__':
         t.join()
     print(f"Time of P2P model: {(time.time_ns() - time_start) * 1e-9}")
 
-    with open("../test_files/largest_alice.txt", "rb") as bg:
+    with open("../test_files/bg.png", "rb") as bg:
 
         bs = bg.read()
         for i in files:
@@ -61,7 +69,7 @@ if __name__ == '__main__':
                 raise Exception()
     print("SUCCESS")
     A.close()
-    K.close()
+    # K.close()
     for c in clients:
         c.close()
 
