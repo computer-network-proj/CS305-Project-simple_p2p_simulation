@@ -33,18 +33,15 @@ class TitForTat:
         使用滑动平均计算每秒收到包数
         :return:
         """
-        decay = 0.5
         while True:
-            time.sleep(5)
-            for cid in self.speed:
-                self.speed[cid] = 0 if self.speed[cid] < 0.001 else self.speed[cid] * decay
+            time.sleep(10)
             for o in self.operating:
                 if o not in self.speed:
                     self.speed[o] = 0
-            for o in self.operating:
-                self.speed[o] += 1 - decay
-            print(f"Length{self.operating}")
-            print(f"Speed{self.speed}")
+                self.speed[o] += 1
+            for o in self.speed:
+                self.speed[o] /= 10
+            # print(f"{self.port} receiving speed: {self.speed}\n", end="")
             self.operating.clear()
 
     def tryRegister(self, cid):
@@ -66,7 +63,7 @@ class TitForTat:
             self.top4.append(cid)
             return True
         else:
-            weakest_in_top4 = min(self.top4, key=lambda c: self.speed[c])
+            weakest_in_top4 = min(self.top4, key=lambda t: self.speed[t])
             if self.speed[cid] > self.speed[weakest_in_top4]:
                 if cid not in self.speed:
                     self.speed[cid] = 0
@@ -104,3 +101,10 @@ class TitForTat:
         :return:
         """
         return cid != self.weak and cid not in self.top4
+
+    def get_speed_of_top4(self):
+        speed_str = f"Speed of Top 4 in {self.port}: \n"
+        for cid in self.top4:
+            speed_str += f"{cid[1]}: {round(self.speed[cid], 3)} "
+        speed_str += "\n"
+        return speed_str

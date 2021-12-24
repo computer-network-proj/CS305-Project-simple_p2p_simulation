@@ -107,6 +107,10 @@ class Tracker:
 
     def default(self, fid, clientIdentification):
         raise NotImplementedError()
+    def autoBroadcast(self):
+        #TODO
+        pass
+
 
 if __name__ == '__main__':
     tracker = Tracker(port=10086, upload_rate=1000)

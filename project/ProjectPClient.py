@@ -36,23 +36,20 @@ class ProjectPClient(PClient):
             # self.lock.acquire()
             pkt = self.sub_process_send_queue.get()
             if pkt[1][0] == "OUT_FILE":
-
                 self.file_map[pkt[1][1]] = pkt[0]
-
             else:
                 self.__send__(pkt[0],pkt[1])
-            # self.lock.release()
 
             time.sleep(0.0001)
 
     def recvThread(self):
         while self.active:
-            # self.lock.acquire()
+
             packet, cid = self.__recv__()
             packetType = Packet.getType(packet)
 
             fid = Packet.getFid(packet)
-
+            # self.lock.acquire()
             if fid in self.sub_process_recv_queue_dic.keys():
                 self.sub_process_recv_queue_dic[fid].put((packet, cid))
                 if packetType == 4:
