@@ -1,3 +1,5 @@
+raise AssertionError("abandoned file")
+
 from Tracker import Tracker
 from Packet import TrackerReqPacket, TrackerRespPacket
 

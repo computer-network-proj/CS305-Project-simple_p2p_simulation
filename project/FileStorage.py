@@ -2,11 +2,9 @@
 职能：实现文件存储，分片，智能选择
 '''
 import hashlib
-import operator
 import os
 import random
 import time
-import threading
 
 BLOCK_SIZE = 32 * 1024  # 现为128KB，可能设置16KB
 

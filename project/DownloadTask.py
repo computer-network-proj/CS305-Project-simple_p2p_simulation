@@ -1,15 +1,11 @@
-from Pipe import Pipe
-# from TitForTat import TitForTat
-from Packet import ClientReqPacket, Packet, ClientRespPacket, TrackerRespPacket
+from project.Pipe import Pipe
+from project.Packet import ClientReqPacket, Packet, ClientRespPacket, TrackerRespPacket
+from project.TitForTat import TitForTat
+from project.FileStorage import FileStorage
 import threading
-from FileStorage import FileStorage
 import time
-import random
-import PClient
-import multiprocessing
 from multiprocessing import Process
 
-from TitForTat import TitForTat
 
 '''
 职能：client对特定文件的维护类

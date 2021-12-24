@@ -1,7 +1,7 @@
 import time
 from threading import Thread
 
-from ProjectPClient import ProjectPClient as PClient
+from PClient import PClient
 from SC_model.client import Client
 from SC_model.server import Server
 

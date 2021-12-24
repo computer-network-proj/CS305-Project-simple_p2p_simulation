@@ -1,4 +1,3 @@
-from queue import SimpleQueue
 import time
 
 '''

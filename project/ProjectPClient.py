@@ -1,4 +1,5 @@
-import signal
+raise AssertionError("abandoned file")
+
 import time
 
 from Packet import TrackerReqPacket, Packet, TrackerRespPacket, ClientRespPacket
@@ -69,17 +70,12 @@ class ProjectPClient(PClient):
     def register(self, file_path: str):
         self.proxy.active = True
 
-        # self.lock.acquire()
-
         fileStorage = FileStorage.fromPath(file_path)
-        # packet = TrackerPacket.generatePacket(TrackerOperation.REGISTER,byteFid)
         fid = fileStorage.fid
         recv_queue = SimpleQueue()
 
         if fid in self.sub_process_recv_queue_dic:
-            # TODO
             pass
-            # self.tasks[fid].fileStorage = fileStorage
         else:
             self.sub_process_recv_queue_dic[fid] = recv_queue
 
@@ -92,7 +88,6 @@ class ProjectPClient(PClient):
             packet = TrackerReqPacket.newRegister(fileStorage.fid)
             packet = packet.toBytes()
             self.__send__(packet, self.tracker)
-        # self.lock.release()
 
         return fid
 
@@ -100,16 +95,12 @@ class ProjectPClient(PClient):
 
     def download(self, fid) -> bytes:
         self.proxy.active = True
-        # TODO 这里需要上线程锁
-        # if task already exists:
-
-        self.proxy.active = True
-
         recv_queue = SimpleQueue()
         self.lock.acquire()
+
+        # if task already exists:
         if fid in self.sub_process_recv_queue_dic:
             pass
-            # TODO
         else:
             self.sub_process_recv_queue_dic[fid] = recv_queue
             p = DownloadTask(FileStorage.fromFid(fid), recv_queue, self.sub_process_send_queue, self.proxy.port,
@@ -128,8 +119,6 @@ class ProjectPClient(PClient):
                 return self.file_map[fid]
 
     def cancel(self, fid):
-        # self.lock.acquire()
-        # packet = TrackerPacket.generatePacket(TrackerOperation.CANCEL,fid.encode())
         packet = TrackerReqPacket.newCancel(fid)
         packet = packet.toBytes()
         self.__send__(packet, self.tracker)
@@ -137,11 +126,9 @@ class ProjectPClient(PClient):
         tmp = self.process.pop(fid)
         sub_send = self.sub_process_recv_queue_dic.pop(fid)
         tmp.terminate()
-        # self.lock.release()
         # TODO our code
 
     def close(self):
-        # self.lock.acquire()
         packet = TrackerReqPacket.newClose()
         packet = packet.toBytes()
         self.__send__(packet, self.tracker)
@@ -151,9 +138,7 @@ class ProjectPClient(PClient):
         for key in temp.keys():
             temp[key].terminate()
 
-
         self.sub_process_recv_queue_dic ={}
-        # self.lock.release()
         time.sleep(1)
         while True:
             if self.proxy.send_queue.qsize()==0:
