@@ -58,21 +58,21 @@ if __name__ == '__main__':
         c.close()
 
     # SC model
-    server = Server(upload_rate=100000, download_rate=1000000, port=10087)
-    server.start()
-    # the download rate of different clients
-    rates = [100000, 100000, 100000, 100000]
-    threads.clear()
-
-    for i, rate in enumerate(rates):
-        c = Client("c%d" % (i + 1), rate)
-        threads.append(Thread(target=client_download, args=[c]))
-
-    time_start = time.time_ns()
-    for thread in threads:
-        thread.start()
-
-    for t in threads:
-        t.join()
-    print(f"Time of SC model: {(time.time_ns() - time_start) * 1e-9}")
-    server.close()
+    # server = Server(upload_rate=100000, download_rate=1000000, port=10087)
+    # server.start()
+    # # the download rate of different clients
+    # rates = [100000, 100000, 100000, 100000]
+    # threads.clear()
+    #
+    # for i, rate in enumerate(rates):
+    #     c = Client("c%d" % (i + 1), rate)
+    #     threads.append(Thread(target=client_download, args=[c]))
+    #
+    # time_start = time.time_ns()
+    # for thread in threads:
+    #     thread.start()
+    #
+    # for t in threads:
+    #     t.join()
+    # print(f"Time of SC model: {(time.time_ns() - time_start) * 1e-9}")
+    # server.close()

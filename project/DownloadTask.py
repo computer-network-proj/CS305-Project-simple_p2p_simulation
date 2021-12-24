@@ -32,7 +32,7 @@ class DownloadTask(Process):
     def run(self):
         if self.tit_tat:
             self.titfortat = TitForTat(self.selfPort)
-            print("Outer" + str(self.selfPort) + str(self.titfortat))
+            # print("Outer" + str(self.selfPort) + str(self.titfortat))
 
         threading.Thread(target=self.run_sub).start()
         threading.Thread(target=self._autoAsk).start()
@@ -57,30 +57,30 @@ class DownloadTask(Process):
         data, cid = packet
         type = Packet.getType(data)
         # tracker
-        self.fileStorage.display()
+        # self.fileStorage.display()
         if type == 2:
             p = TrackerRespPacket.fromBytes(data)
             for c in self.peers - p.info:
                 self.fileStorage.cancel(c)
-            print(f'{cid[1]} > {self.selfPort} | {p}\n', end='')
+            # print(f'{cid[1]} > {self.selfPort} | {p}\n', end='')
             self.peers = p.info
             # self.downloadingPeers = self.downloadingPeers & self.peers
         elif type == 3:
             start = time.time()
             p = ClientReqPacket.fromBytes(data)
-            print(f'{cid[1]} > {self.selfPort} | {p}\n', end='')
+            # print(f'{cid[1]} > {self.selfPort} | {p}\n', end='')
             if p.index == -1:
                 self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, -1, b'').toBytes(), cid)
             else:
                 if self.tit_tat:
                     self.titfortat.tryRegister(cid)
                     able = self.fileStorage.haveFilePieces[p.index] and not self.titfortat.isChoking(cid)
-                    if self.titfortat.isChoking(cid):
-                        print(f"{self.selfPort} Chocking {cid[1]}")
+                    # if self.titfortat.isChoking(cid):
+                        # print(f"{self.selfPort} Chocking {cid[1]}")
                 else:
                     able = self.fileStorage.haveFilePieces[p.index]
                 if able:
-                    print(f'{self.selfPort} send {cid[1]} {p.index}')
+                    # print(f'{self.selfPort} send {cid[1]} {p.index}')
                     self.pipe.send(ClientRespPacket(self.fid, self.fileStorage.haveFilePieces, p.index,
                                                     self.fileStorage.filePieces[p.index]).toBytes(), cid)
                 else:
@@ -90,10 +90,10 @@ class DownloadTask(Process):
         elif type == 4:
             start = time.time()
             p = ClientRespPacket.fromBytes(data)
-            print(f'{cid[1]} > {self.selfPort} | {p}\n', end='')
+            # print(f'{cid[1]} > {self.selfPort} | {p}\n', end='')
             if p.index == -2:
                 self.fileStorage.cancel(cid)
-                self.downloadingPeers.remove(cid)
+                # self.downloadingPeers.remove(cid)
             else:
                 if p.index == -1:
                     if cid in self.fileStorage.promisesMap.keys() and len(self.fileStorage.promisesMap[cid]) > 0:
@@ -106,7 +106,7 @@ class DownloadTask(Process):
                 if self.fileStorage.isInteresting(p.haveFilePieces):
                     chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces)
                     if chosenIndex == -1: return
-                    print(f'{cid[1]} promise {self.selfPort} {chosenIndex}\n', end='')
+                    # print(f'{cid[1]} promise {self.selfPort} {chosenIndex}\n', end='')
                     self.fileStorage.promise(chosenIndex, cid)
                     self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
                 else:
@@ -124,14 +124,14 @@ class DownloadTask(Process):
 
     def _autoAsk(self):
         while not self.closed:
-            print(f"{self.selfPort} autoAsk {self.fileStorage.isComplete()}")
+            # print(f"{self.selfPort} autoAsk {self.fileStorage.isComplete()}")
             if self.fileStorage.isComplete():
                 return
             # possiblePeers = list(self.peers - self.downloadingPeers - {('127.0.0.1', self.selfPort)})
             possiblePeers = list(self.peers - {('127.0.0.1', self.selfPort)})
             # print(str(self.selfPort) + " " + str(possiblePeers))
-            print(f"{self.selfPort} peers {possiblePeers}")
-            print(f'{self.pipe.send_queue}')
+            # print(f"{self.selfPort} peers {possiblePeers}")
+            # print(f'{self.pipe.send_queue}')
             for peer in possiblePeers:
                 self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), peer)
                 time.sleep(1)
