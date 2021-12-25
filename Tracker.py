@@ -1,5 +1,5 @@
 from Proxy import Proxy
-from project.Packet import TrackerReqPacket, TrackerRespPacket
+from Packet import TrackerReqPacket, TrackerRespPacket
 
 class Tracker:
     def __init__(self, upload_rate=10000, download_rate=10000, port=None):

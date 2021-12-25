@@ -1,8 +1,8 @@
 from Proxy import Proxy
 import time
-from project.Packet import TrackerReqPacket, Packet, TrackerRespPacket, ClientRespPacket
-from project.DownloadTask import DownloadTask
-from project.FileStorage import FileStorage
+from Packet import TrackerReqPacket, Packet
+from DownloadTask import DownloadTask
+from FileStorage import FileStorage
 import threading
 from multiprocessing import SimpleQueue
 
