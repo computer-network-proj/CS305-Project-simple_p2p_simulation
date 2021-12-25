@@ -14,7 +14,7 @@ def client_download(client):
 
 if __name__ == '__main__':
     # A, B, C, D, E join the network
-    A = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+    A = PClient(tracker_address, upload_rate=1000000, download_rate=100000)
     B = PClient(tracker_address, upload_rate=100000, download_rate=100000)
     C = PClient(tracker_address, upload_rate=100000, download_rate=100000)
     D = PClient(tracker_address, upload_rate=100000, download_rate=100000)

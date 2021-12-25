@@ -146,7 +146,7 @@ class ProjectPClient(PClient):
 if __name__ == '__main__':
     tracker_address = ("127.0.0.1", 10086)
     # file_path = '../test_files/alice.txt'
-    file_path = '../test_files/bg.png'
+    file_path = 'test_files/bg.png'
     PC1 = ProjectPClient(tracker_address, upload_rate=100000, download_rate=100000)
     PC2 = ProjectPClient(tracker_address, upload_rate=100000, download_rate=100000)
     PC3 = ProjectPClient(tracker_address, upload_rate=100000, download_rate=100000)

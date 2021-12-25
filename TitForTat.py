@@ -1,6 +1,6 @@
 import threading
 import time
-import project.Packet as Packet
+import Packet as Packet
 
 '''
 职能：速度监控，top4+weak维护

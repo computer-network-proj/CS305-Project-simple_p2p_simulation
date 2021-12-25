@@ -40,8 +40,7 @@ class FileStorage:
         self.fid = fid
         self.max_timeout = 999
         self.closed = False
-        # self.timeoutThread = threading.Thread(target=self.timeout)
-        # self.timeoutThread.start()
+        self.filePiecesMap = {}
         self.promisesMap = {}
 
     def close(self):
@@ -203,7 +202,36 @@ class FileStorage:
     #
     #     return len(myPieces - partnerPieces) > 0
 
-    def generateRequest(self, haveFilePiecesOffered):
+    def generateRequestAdvanced(self, haveFilePiecesOffered, cid):
+        """.
+
+        随机寻找一个未被下载的文件片，添加稀缺选择
+        :param haveFilePiecesOffered: 对方的haveFilePieces数组
+        :param cid: client id
+        :return: 文件片段index。如果找不到，返回-1
+        """
+
+        self.filePiecesMap[cid] = haveFilePiecesOffered
+        fileFrequency = [0 for _ in range(len(haveFilePiecesOffered))]
+        st = time.time()
+        for i in self.filePiecesMap.keys():
+            fileFrequency = [x + y for x, y in zip(fileFrequency, self.filePiecesMap[i])]
+        print(time.time() - st)
+        blockNum = int.from_bytes(self.fid[:4], byteorder="big")
+        myPieces = set([i for i in range(blockNum) if self.haveFilePieces[i] == True])
+        partnerPieces = set([i for i in range(blockNum) if haveFilePiecesOffered[i] == True])
+        myPromises = set([i for i in range(blockNum) if self.promises[i] > 0])
+
+        difference = partnerPieces - myPieces
+        difference = difference - myPromises
+        difference = list(difference)
+        if len(difference) == 0:
+            return -1
+        else:
+            return min(difference, key=lambda x: fileFrequency[x] + random.random())
+            # return random.sample(difference, 1)[0]
+
+    def generateRequest(self, haveFilePiecesOffered, cid):
         """.
 
         随机寻找一个未被下载的文件片
@@ -248,7 +276,7 @@ if __name__ == '__main__':
     print("hello python")
 
     # file_path = '../test_files/alice.txt'
-    file_path = '../test_files/bg.png'
+    file_path = 'test_files/bg.png'
     file = FileStorage.fromPath(file_path)
     # print(file.filePieces)
     b = b""
