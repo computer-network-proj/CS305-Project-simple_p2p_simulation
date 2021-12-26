@@ -15,18 +15,20 @@ def client_download(client):
 if __name__ == '__main__':
     # A, B, C, D, E join the network
     A = PClient(tracker_address, upload_rate=100000, download_rate=100000)
-    B = PClient(tracker_address, upload_rate=100000, download_rate=40000)
-    C = PClient(tracker_address, upload_rate=100000, download_rate=80000)
-    D = PClient(tracker_address, upload_rate=100000, download_rate=80000)
-    E = PClient(tracker_address, upload_rate=100000, download_rate=200000)
-    fid = A.register("../test_files/bg.png")
+    B = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+    C = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+    D = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+    E = PClient(tracker_address, upload_rate=100000, download_rate=100000)
+    fid = A.register("../test_files/largest_alice.txt")
     files = {}
     clients = [B, C, D, E]
     threads = []
 
+
     # function for download and save
     def download(node, index):
         files[index] = node.download(fid)
+
 
     for i, client in enumerate(clients):
         threads.append(Thread(target=download, args=(clients[i], i)))
@@ -37,7 +39,7 @@ if __name__ == '__main__':
     for t in threads:
         t.join()
     print(f"Time of P2P model: {(time.time_ns() - time_start) * 1e-9}")
-    with open("../test_files/bg.png", "rb") as bg:
+    with open("../test_files/largest_alice.txt", "rb") as bg:
         bs = bg.read()
         for i in files:
             if files[i] != bs:

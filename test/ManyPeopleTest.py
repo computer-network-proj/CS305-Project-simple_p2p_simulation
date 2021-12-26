@@ -30,7 +30,7 @@ if __name__ == '__main__':
     L = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40012)
     M = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40013)
     N = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40014)
-    O  = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40015)
+    O = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40015)
     P = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40016)
     Q = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40017)
     R = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40018)
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # K.register("../test_files/big_alice.txt")
     files = {}
-    clients = [B, C, D, E, F, G, H, I, J,K,L, M,N,O,P,Q,R,S,T,U]
+    clients = [B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U]
     threads = []
 
 

@@ -6,21 +6,20 @@ import threading
 import time
 from multiprocessing import Process
 
-
 '''
 职能：client对特定文件的维护类
 '''
 
 
 class DownloadTask(Process):
-    def __init__(self, fileStorage: FileStorage, rec_queue, send_queue,file_queue, selfPort=None, tit_tat=False):
+    def __init__(self, fileStorage: FileStorage, rec_queue, send_queue, file_queue, selfPort=None, tit_tat=False):
         Process.__init__(self)
 
         self.fid = fileStorage.fid
         self.peers = set()
         self.closed = False
         self.downloadingPeers = set()
-        self.pipe = Pipe(rec_queue, send_queue,file_queue)
+        self.pipe = Pipe(rec_queue, send_queue, file_queue)
         self.fileStorage = fileStorage
         self.selfPort = selfPort
         self.tit_tat = tit_tat
@@ -33,7 +32,6 @@ class DownloadTask(Process):
         threading.Thread(target=self.run_sub).start()
         threading.Thread(target=self._autoAsk).start()
         threading.Thread(target=self.getFile).start()
-
 
     def run_sub(self):
         """
@@ -124,7 +122,8 @@ class DownloadTask(Process):
     def _autoAsk(self):
         while not self.closed:
             num = sum(self.fileStorage.promises)
-            have_temp = [self.fileStorage.haveFilePieces[i] or self.fileStorage.promises[i] > 0 for i in range(len(self.fileStorage.haveFilePieces))]
+            have_temp = [self.fileStorage.haveFilePieces[i] or self.fileStorage.promises[i] > 0 for i in
+                         range(len(self.fileStorage.haveFilePieces))]
             percent = sum(have_temp) / len(self.fileStorage.haveFilePieces)
             rest = len(have_temp) - sum(have_temp)
             # print(f"{self.selfPort} autoAsk {self.fileStorage.isComplete()}")

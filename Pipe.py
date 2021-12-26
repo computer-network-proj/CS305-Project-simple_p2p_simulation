@@ -6,7 +6,7 @@ import time
 
 
 class Pipe:
-    def __init__(self, rec_queue, send_queue,file_queue):
+    def __init__(self, rec_queue, send_queue, file_queue):
         self.recv_queue = rec_queue
         self.send_queue = send_queue
         self.file_queue = file_queue

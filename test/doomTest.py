@@ -5,7 +5,6 @@ from PClient import PClient
 
 tracker_address = ("127.0.0.1", 10086)
 
-
 if __name__ == '__main__':
     # A,B,C,D,E join the network
     A = PClient(tracker_address, upload_rate=200000, download_rate=50000, port=40001)
@@ -22,19 +21,21 @@ if __name__ == '__main__':
 
     K = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40011)
     L = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40012)
-    clients = [B, C, D, E,G,H,I,J]
+    clients = [B, C, D, E, G, H, I, J]
     # A register a file and B download it
     fid = A.register("../test_files/bg.png")
     fid_two = A.register("../test_files/big_alice.txt")
-    clients_1 = [E,G,H,I,J]
+    clients_1 = [E, G, H, I, J]
     threads = []
     files = {}
-    files_1 ={}
+    files_1 = {}
     threads_1 = []
+
 
     # function for download and save
     def download(node, index):
         files[index] = node.download(fid)
+
 
     def download_1(node, index):
         files_1[index] = node.download(fid_two)
@@ -83,7 +84,7 @@ if __name__ == '__main__':
     F = PClient(tracker_address, upload_rate=50000, download_rate=100000)
     # G = PClient(tracker_address, upload_rate=100000, download_rate=60000)
     # F, G join the network
-    clients = [F,G]
+    clients = [F, G]
     for i, client in enumerate(clients):
         threads.append(Thread(target=download, args=(client, i)))
     for t in threads:

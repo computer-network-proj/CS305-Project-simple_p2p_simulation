@@ -3,6 +3,7 @@ import threading
 from Proxy import Proxy
 from Packet import TrackerReqPacket, TrackerRespPacket
 
+
 class Tracker:
     def __init__(self, upload_rate=10000, download_rate=10000, port=None):
         self.proxy = Proxy(upload_rate, download_rate, port)
@@ -49,7 +50,6 @@ class Tracker:
             print(type, info)
             self.SWITCH.get(type, self.default)(info, identification)
             print(self.information)
-
 
     def register(self, fid, clientIdentification):
         self.Tracker_lock.acquire()
@@ -119,7 +119,6 @@ class Tracker:
     def default(self, fid, clientIdentification):
         raise NotImplementedError()
 
-
     def autoBroadcast(self):
         while True:
             self.Tracker_lock.acquire()
@@ -128,7 +127,6 @@ class Tracker:
             self.Tracker_lock.release()
             print("广播")
             time.sleep(10)
-
 
 
 if __name__ == '__main__':

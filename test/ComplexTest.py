@@ -5,7 +5,6 @@ from PClient import PClient
 
 tracker_address = ("127.0.0.1", 10086)
 
-
 if __name__ == '__main__':
     # A,B,C,D,E join the network
     A = PClient(tracker_address, upload_rate=200000, download_rate=50000)
@@ -20,9 +19,11 @@ if __name__ == '__main__':
     threads = []
     files = {}
 
+
     # function for download and save
     def download(node, index):
         files[index] = node.download(fid)
+
 
     time_start = time.time_ns()
     for i, client in enumerate(clients):

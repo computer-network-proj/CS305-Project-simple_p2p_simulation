@@ -254,7 +254,7 @@ class FileStorage:
             return random.sample(difference, 1)[0]
 
     def __str__(self):
-        string = str(round(sum(self.haveFilePieces) / len(self.haveFilePieces)* 100, 1)) + '%\t'
+        string = str(round(sum(self.haveFilePieces) / len(self.haveFilePieces) * 100, 1)) + '%\t'
         for i in range(len(self.haveFilePieces)):
             if i % 10 == 0: string += ' '
             if self.haveFilePieces[i]:
@@ -271,54 +271,3 @@ class FileStorage:
     def display(self):
         print(self.__str__(), end='')
 
-
-if __name__ == '__main__':
-    print("hello python")
-
-    # file_path = '../test_files/alice.txt'
-    file_path = 'test_files/bg.png'
-    file = FileStorage.fromPath(file_path)
-    # print(file.filePieces)
-    b = b""
-    for item in file.filePieces:
-        b = b + item
-
-    bin_file = open(file_path, 'rb')
-    size = os.path.getsize(file_path)
-    data_new = bin_file.read()
-    bin_file.close()
-    fid_new = FileStorage.generateFid(data_new).encode()
-    print(file.fid)
-    print(fid_new)
-    if data_new == b and fid_new == file.fid[4:]:
-        print("成功")
-    else:
-        print("失败")
-
-    fid = file.fid
-    temp = FileStorage.fromFid(fid)
-    print(file.fid)
-    print(file.isComplete())
-    print(temp.isComplete())
-
-    # NOTE:test getFile
-    print(temp.getFile())
-    if file.getFile() == data_new:
-        print("pass")
-
-    # NOTE:test add
-    temp.add(10, b"asasdasdasd")
-    temp.add(11, b"asdasdas")
-    temp.add(12, b"asdasdasd")
-
-    # NOTE: test isInteresting and isInterested
-    # print(file.isInterested(temp.haveFilePieces))
-    # print(file.isInteresting(temp.haveFilePieces))
-    # print(temp.isInterested(file.haveFilePieces))
-    # print(temp.isInteresting(file.haveFilePieces))
-
-    # NOTE:test generateRequest
-    for i in range(500):
-        # print(file.generateRequest(temp.haveFilePieces))
-        if temp.generateRequest(file.haveFilePieces) == 10:
-            print("fail")

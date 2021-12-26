@@ -6,6 +6,7 @@ from FileStorage import FileStorage
 import threading
 from multiprocessing import SimpleQueue
 
+
 class PClient:
     def __init__(self, tracker_addr: (str, int), proxy=None, port=None, upload_rate=0, download_rate=0, tit_tat=False):
         if proxy:
@@ -25,9 +26,9 @@ class PClient:
         self.lock = threading.Lock()
         self.tit_tat = tit_tat
 
-        threading.Thread(target=self.recvThread,daemon=True).start()
-        threading.Thread(target=self.sendThread,daemon=True).start()
-        threading.Thread(target=self.fileThread,daemon=True).start()
+        threading.Thread(target=self.recvThread, daemon=True).start()
+        threading.Thread(target=self.sendThread, daemon=True).start()
+        threading.Thread(target=self.fileThread, daemon=True).start()
 
     def fileThread(self):
         while self.active:
@@ -37,7 +38,6 @@ class PClient:
                 pkt = self.file_queue.get()
                 self.file_map[pkt[1][1]] = pkt[0]
 
-
     def sendThread(self):
         while self.active:
             pkt = self.sub_process_send_queue.get()
@@ -46,7 +46,7 @@ class PClient:
             #     self.file_map[pkt[1][1]] = pkt[0]
             #
             # else:
-            self.__send__(pkt[0],pkt[1])
+            self.__send__(pkt[0], pkt[1])
 
             time.sleep(0.00001)
 
@@ -68,8 +68,6 @@ class PClient:
             else:
                 print("miss")
                 print(str(cid[1]) + " > " + str(self.proxy.port))
-                print(self.sub_process_recv_queue_dic.keys())
-
 
     def __send__(self, data: bytes, dst: (str, int)):
         """
@@ -112,7 +110,7 @@ class PClient:
         else:
             self.sub_process_recv_queue_dic[fid] = recv_queue
 
-            p = DownloadTask(fileStorage, recv_queue, self.sub_process_send_queue,self.file_queue,self.proxy.port,
+            p = DownloadTask(fileStorage, recv_queue, self.sub_process_send_queue, self.file_queue, self.proxy.port,
                              tit_tat=self.tit_tat)
             p.daemon = False
             self.process[fid] = p
@@ -146,7 +144,8 @@ class PClient:
             pass
         else:
             self.sub_process_recv_queue_dic[fid] = recv_queue
-            p = DownloadTask(FileStorage.fromFid(fid), recv_queue, self.sub_process_send_queue,self.file_queue, self.proxy.port,
+            p = DownloadTask(FileStorage.fromFid(fid), recv_queue, self.sub_process_send_queue, self.file_queue,
+                             self.proxy.port,
                              tit_tat=self.tit_tat)
             self.process[fid] = p
             p.daemon = False
@@ -196,11 +195,11 @@ class PClient:
         for key in temp.keys():
             temp[key].terminate()
 
-        self.sub_process_recv_queue_dic ={}
+        self.sub_process_recv_queue_dic = {}
         time.sleep(1)
         while True:
-            if self.proxy.send_queue.qsize()==0:
-                print(self.proxy.send_queue)
+            if self.proxy.send_queue.qsize() == 0:
+                # print(self.proxy.send_queue)
                 self.proxy.close()
                 break
             time.sleep(0.0001)

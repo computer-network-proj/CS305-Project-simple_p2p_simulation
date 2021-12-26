@@ -27,12 +27,17 @@ if __name__ == '__main__':
     J = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40010)
     K = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40011)
 
+    L = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40012)
+    M = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40013)
+    N = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40014)
+    O = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40015)
+    P = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40016)
 
     fid = A.register("../test_files/bg.png")
 
     # K.register("../test_files/big_alice.txt")
     files = {}
-    clients = [B, C, D, E, F, G, H, I, J, K]
+    clients = [B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
     threads = []
 
 
