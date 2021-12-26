@@ -200,6 +200,7 @@ class PClient:
         time.sleep(1)
         while True:
             if self.proxy.send_queue.qsize()==0:
+                print(self.proxy.send_queue)
                 self.proxy.close()
                 break
             time.sleep(0.0001)

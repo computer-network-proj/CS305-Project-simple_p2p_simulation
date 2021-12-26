@@ -14,13 +14,14 @@ if __name__ == '__main__':
     D = PClient(tracker_address, upload_rate=70000, download_rate=40000, port=40004)
     E = PClient(tracker_address, upload_rate=200000, download_rate=700000, port=40005)
 
-    F = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40006)
+    # F = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40006)
     G = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40007)
     H = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40008)
     I = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40009)
     J = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40010)
 
     K = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40011)
+    L = PClient(tracker_address, upload_rate=100000, download_rate=100000, port=40012)
     clients = [B, C, D, E,G,H,I,J]
     # A register a file and B download it
     fid = A.register("../test_files/bg.png")
@@ -55,7 +56,7 @@ if __name__ == '__main__':
     time.sleep(10)
     A.close()
     time.sleep(5)
-    F.register("../test_files/bg.png")
+    L.register("../test_files/bg.png")
     K.register("../test_files/big_alice.txt")
 
     # wait for finish
@@ -78,15 +79,24 @@ if __name__ == '__main__':
                 raise Exception("Downloaded file is different with the original one 1")
     # B, C, D, E has completed the download of file
     threads.clear()
+    files = {}
     F = PClient(tracker_address, upload_rate=50000, download_rate=100000)
-    G = PClient(tracker_address, upload_rate=100000, download_rate=60000)
+    # G = PClient(tracker_address, upload_rate=100000, download_rate=60000)
     # F, G join the network
-    clients = [F, G]
+    clients = [F,G]
     for i, client in enumerate(clients):
         threads.append(Thread(target=download, args=(client, i)))
     for t in threads:
         t.start()
 
+    for t in threads:
+        t.join()
+
+    with open("../test_files/bg.png", "rb") as bg:
+        bs = bg.read()
+        for i in files:
+            if files[i] != bs:
+                raise Exception("Downloaded file is different with the original one")
     # A exits
     # time.sleep(20)
     # A.cancel(fid)
@@ -105,9 +115,16 @@ if __name__ == '__main__':
             raise Exception("Downloaded file is different with the original one")
     print("SUCCESS")
 
-    A.close()
+    # A.close()
+    # B.close()
     C.close()
+    # D.close()
     E.close()
     F.close()
     G.close()
+    H.close()
+    I.close()
+    J.close()
+    K.close()
+    L.close()
     print((time.time_ns() - time_start) * 1e-9)
