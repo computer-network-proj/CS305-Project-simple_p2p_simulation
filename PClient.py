@@ -1,8 +1,8 @@
 from Proxy import Proxy
 import time
-from project.Packet import TrackerReqPacket, Packet, TrackerRespPacket, ClientRespPacket
-from project.DownloadTask import DownloadTask
-from project.FileStorage import FileStorage
+from Packet import TrackerReqPacket, Packet
+from DownloadTask import DownloadTask
+from FileStorage import FileStorage
 import threading
 from multiprocessing import SimpleQueue
 
@@ -200,6 +200,7 @@ class PClient:
         time.sleep(1)
         while True:
             if self.proxy.send_queue.qsize()==0:
+                print(self.proxy.send_queue)
                 self.proxy.close()
                 break
             time.sleep(0.0001)

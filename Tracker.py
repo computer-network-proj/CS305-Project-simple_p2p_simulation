@@ -1,5 +1,7 @@
+import time
+import threading
 from Proxy import Proxy
-from project.Packet import TrackerReqPacket, TrackerRespPacket
+from Packet import TrackerReqPacket, TrackerRespPacket
 
 class Tracker:
     def __init__(self, upload_rate=10000, download_rate=10000, port=None):
@@ -9,6 +11,7 @@ class Tracker:
                        3: self.cancel,
                        4: self.close}
         self.information = {}
+        self.Tracker_lock = threading.Lock()
 
     def __send__(self, data: bytes, dst: (str, int)):
         """
@@ -34,6 +37,7 @@ class Tracker:
         Start the Tracker and it will work forever
         :return: None
         """
+        # threading.Thread(target=self.autoBroadcast).start()
         while True:
             packet, identification = self.__recv__()
             print("Receive packet:{} from {}".format(packet, identification))
@@ -48,24 +52,27 @@ class Tracker:
 
 
     def register(self, fid, clientIdentification):
+        self.Tracker_lock.acquire()
         if fid not in self.information.keys():
             self.information[fid] = set()
             self.information[fid].add(clientIdentification)
         else:
             self.information[fid].add(clientIdentification)
-
         self.broadcast(fid)
+        self.Tracker_lock.release()
 
     def download(self, fid, clientIdentification):
+        self.Tracker_lock.acquire()
         if fid not in self.information.keys():
             self.information[fid] = set()
             self.information[fid].add(clientIdentification)
         else:
             self.information[fid].add(clientIdentification)
-
         self.broadcast(fid)
+        self.Tracker_lock.release()
 
     def cancel(self, fid, clientIdentification):
+        self.Tracker_lock.acquire()
         if fid in self.information.keys():
             if clientIdentification in self.information[fid]:
                 self.information[fid].remove(clientIdentification)
@@ -78,7 +85,10 @@ class Tracker:
         else:
             pass
 
+        self.Tracker_lock.release()
+
     def close(self, fid, clientIdentification):
+        self.Tracker_lock.acquire()
         broadcastList = []
         zeroList = []
         for item in self.information.keys():
@@ -94,6 +104,7 @@ class Tracker:
 
         for fid in broadcastList:
             self.broadcast(fid)
+        self.Tracker_lock.release()
 
     def broadcast(self, fid: str):
         receivers = self.information.get(fid)
@@ -107,9 +118,17 @@ class Tracker:
 
     def default(self, fid, clientIdentification):
         raise NotImplementedError()
+
+
     def autoBroadcast(self):
-        #TODO
-        pass
+        while True:
+            self.Tracker_lock.acquire()
+            for fid in self.information.keys():
+                self.broadcast(fid)
+            self.Tracker_lock.release()
+            print("广播")
+            time.sleep(10)
+
 
 
 if __name__ == '__main__':

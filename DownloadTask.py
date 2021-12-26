@@ -1,7 +1,7 @@
-from project.Pipe import Pipe
-from project.Packet import ClientReqPacket, Packet, ClientRespPacket, TrackerRespPacket
-from project.TitForTat import TitForTat
-from project.FileStorage import FileStorage
+from Pipe import Pipe
+from Packet import ClientReqPacket, Packet, ClientRespPacket, TrackerRespPacket
+from TitForTat import TitForTat
+from FileStorage import FileStorage
 import threading
 import time
 from multiprocessing import Process
@@ -42,8 +42,6 @@ class DownloadTask(Process):
         """
         while not self.closed:
             packet = self.pipe.recv()
-            # print(self.pipe.recv_queue.qsize())
-            # threading.Thread(target=self.opPacket, args=[packet]).start()
             self.opPacket(packet)
 
     def opPacket(self, packet):
@@ -95,16 +93,18 @@ class DownloadTask(Process):
                 # self.downloadingPeers.remove(cid)
             else:
                 if p.index == -1:
-                    if cid in self.fileStorage.promisesMap.keys() and len(self.fileStorage.promisesMap[cid]) > 0:
+                    if not self.fileStorage.isInteresting(p.haveFilePieces) and \
+                            cid in self.fileStorage.promisesMap.keys() and \
+                            len(self.fileStorage.promisesMap[cid]) > 0:
                         self.fileStorage.cancel(cid)
-                    if cid in self.fileStorage.promisesMap.keys() and len(self.fileStorage.promisesMap[cid]) > 2:
-                        return
                 if p.index != -1:
                     if self.fileStorage.haveFilePieces[p.index]: return
                     self.fileStorage.add(p.index, p.data)
+                if cid in self.fileStorage.promisesMap.keys() and len(self.fileStorage.promisesMap[cid]) > 2:
+                    return
                 if self.fileStorage.isInteresting(p.haveFilePieces):
-                    chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces)
-                    if chosenIndex == -1: return
+                    chosenIndex = self.fileStorage.generateRequest(p.haveFilePieces, cid)
+                    assert chosenIndex != -1
                     # print(f'{cid[1]} promise {self.selfPort} {chosenIndex}\n', end='')
                     self.fileStorage.promise(chosenIndex, cid)
                     self.pipe.send(ClientReqPacket(self.fileStorage.fid, chosenIndex).toBytes(), cid)
@@ -133,7 +133,9 @@ class DownloadTask(Process):
             possiblePeers = list(self.peers - {('127.0.0.1', self.selfPort)})
             for peer in possiblePeers:
                 self.pipe.send(ClientReqPacket(self.fileStorage.fid, -1).toBytes(), peer)
+
                 if num < 2 and rest > 10 and percent < 0.5:
+
                     time.sleep(0.1)
                 else:
                     time.sleep(1)
